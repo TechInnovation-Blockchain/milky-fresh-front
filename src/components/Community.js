@@ -7,7 +7,7 @@ const Community = () => {
     return (
         <div class= "community-div">
             <h2>MilkyWay's evolving community</h2>
-            <Row style = {{width : "80%", margin: "0 auto", paddingTop : "50px"}}>
+            <Row style = {{width : "50%", margin: "0 auto", paddingTop : "50px"}}>
                 <Col>
                 <div class = "community-circ wallets-icon">
                     {/* <image src = "../resources/images/wallets-icon.png" alt="Wallet Icon" style={{width:"2000", height:"2000"}}/> */}

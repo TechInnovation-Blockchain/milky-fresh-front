@@ -198,8 +198,8 @@ background-size:cover; */
 
   margin-right: auto;
   margin-left:auto;
-  margin-top: 20px;
-  width: 200px;
+  margin-top: -20px;
+  /* width: 200px; */
   height: 200px;
   position: relative;
 }
@@ -210,7 +210,7 @@ background-size:cover; */
   z-index: 5;
   position: relative;
 
-  margin-top: -950px;
+  margin-top: -1000px;
 
   width: 100%;
   height: 100%;
@@ -221,25 +221,26 @@ background-size:cover; */
 
   /* box-shadow: 0 0 20px 20px black  ; */
   /* background-blend-mode: difference; */
-  min-height:max-content;
+  height: 850px;
   padding-bottom: 120px;
 }
 
 .dimmer {
-  margin-top: 0px;  
+  margin-top: -90px;  
+  
   /* padding-top: -80px; */
-    /* background-color: black; */
-    width: 100%;
+    background-color: black;
+    width: 2000px;
     
     /* position:absolute; */
-    top:0;
-    left:0;
-    height: 990px;
-    -webkit-filter: blur(20px);
--moz-filter: blur(20px);
--o-filter: blur(20px);
--ms-filter: blur(20px);
-filter: blur(20px);
+    /* top:0; */
+    /* left:0; */
+    height: 1200px;
+    /* -webkit-filter: blur(50px); */
+/* -moz-filter: blur(50px); */
+/* -o-filter: blur(50px); */
+/* -ms-filter: blur(50px); */
+filter: blur(50px);
 
   /* -webkit-mask-image: linear-gradient(to top, black 90%, transparent 100%);
   mask-image: linear-gradient(to top, black 90%, transparent 100%); */
@@ -247,7 +248,7 @@ filter: blur(20px);
 }
 
 .galaxy-back {
-  margin-top: -990px;
+  margin-top: -1160px;
 
 
   background-image: url("./resources/images/galaxy.png");
@@ -257,7 +258,7 @@ filter: blur(20px);
   background-size:auto;
   background-position-x: center;
   background-position-y: -30%;
-  width: 50%;
+  width: 55%;
   height: 990px;
 
   /* position:absolute; */
@@ -296,7 +297,8 @@ filter: blur(20px);
 /* COMMUNITY */
 
 .community-div{
-  padding-top: 20px;
+  margin-top: 230px;
+  padding-top: 80px;
 
 background-image: url("./resources/images/back2.png");
 /* overflow: visible; */
@@ -304,6 +306,10 @@ background-repeat: no-repeat;
 background-size:cover;
 
 height: 1000px;
+}
+
+.community-div h2 {
+  display: block;
 }
 
 
@@ -324,6 +330,7 @@ height: 1000px;
 
 .community-circ h2 {
   padding-top: 18%;
+  
 }
 
 
@@ -360,7 +367,7 @@ div.milkyway-icon {
 /* PARTNERS */
 
 .partners-div {
-  padding-top: 50px;
+  padding-top:70px;
 
   /* background-color: black; */
 
