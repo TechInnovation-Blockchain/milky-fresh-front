@@ -40,7 +40,7 @@
 /* REUSABLES */
 
 /* gradient button */
-.galaxy Button, .App-header Button, .dash-btn1 {
+.galaxy Button, .milkynav Button, .dash-btn1 {
   border: none;
   background-image: linear-gradient(to right, var(--yellow), var(--pinkred));
   color : white;
@@ -117,6 +117,11 @@
   font-size: 12px;
   padding: 8px 18px;
 
+}
+.dash-btn2 {
+  background-image: none;
+  background-color:white;
+  color: black;
 }
 
 .dash-circ {
