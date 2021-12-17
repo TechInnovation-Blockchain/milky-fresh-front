@@ -9,7 +9,7 @@ const Dash = () => {
             <Container class = "dash-contain" style = {{width : "100%", justifyContent : "center", textAlign : "center", alignItems : "center"}}>
                 <Col style = {{justifyContent : "center", textAlign : "center", alignItems : "center"}}>
 
-                <img src = {logo} alt = "MilkyWay Exchange" href = "#home" style = {{width : "605px", paddingTop : "100px"}}/>
+                <img src = {logo} alt = "MilkyWay Exchange" href = "/" style = {{width : "605px", paddingTop : "130px"}}/>
                 <p style = {{width : "690px", textAlign:"center", fontSize : "12px", paddingTop: "50px", paddingBottom : "50px"}}>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
                 </p>

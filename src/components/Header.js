@@ -7,9 +7,9 @@ const Header = () => {
         <div class = "milkynav" style = {{alignItems: "left"}}>
             <Navbar style = {{alignItems: "left"}}>
                 <Container>
-                    <Navbar.Brand href="#home"><img src = {logo} alt="Milkyway" style={{ alignSelf: 'left' }}/></Navbar.Brand>
-                    <Nav.Link>Analytics</Nav.Link>
-                    <Button class = "dash-btn button-grad clickable">Milky App</Button>
+                    <Navbar.Brand id="navbrand" href="/"><img src = {logo} alt="Milkyway" style={{ alignSelf: 'left' }}/></Navbar.Brand>
+                    <a class="milky-navlink">Analytics</a>
+                    <Button class = "milky-navbtn">Milky App</Button>
                 </Container>
                 
             </Navbar>

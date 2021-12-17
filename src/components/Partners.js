@@ -6,7 +6,7 @@ const Partners = () => {
     return (
         <div class = "partners-div">
              <h2>Partners helping us travel faster through the galaxy</h2>
-            <Row style = {{width : "80%"}}>
+            <Row style = {{width : "80%", margin: "0 auto", paddingTop : "50px"}}>
                 <Col >
                     <div class = "partners-circ" >                                                
                     </div>
