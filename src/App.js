@@ -7,6 +7,9 @@ import back1 from "./resources/images/back1.png";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Dash from './components/Dash';
 import Galaxy from './components/Galaxy';
+import Community from './components/Community';
+import Partners from './components/Partners';
+
 
 
 function App() {
@@ -18,6 +21,8 @@ function App() {
         <Header/>
         <Dash/>
         <Galaxy/>
+        <Community/>
+        <Partners/>
         {/* <Land/> */}
 
         <Footer/>

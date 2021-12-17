@@ -9,7 +9,7 @@ const Header = () => {
                 <Container>
                     <Navbar.Brand href="#home"><img src = {logo} alt="Milkyway" style={{ alignSelf: 'left' }}/></Navbar.Brand>
                     <Nav.Link>Analytics</Nav.Link>
-                    <Button class = "btn-orange-moon">Milky App</Button>
+                    <Button class = "dash-btn button-grad clickable">Milky App</Button>
                 </Container>
                 
             </Navbar>

@@ -24,13 +24,13 @@ const Footer = () => {
                                 <img src = {twitter} alt = "Twitter"/>
                             </a>
                             <a
-                            href="https://www.facebook.com/learnbuildteach/"
+                            href="https://www.facebook.com"
                             className="telegram social"
                             >
                                 <img src = {telegram} alt = "Telegram"/>
                             </a>
                             <a
-                            href="http://www.instagram.com/larnbuildteach"
+                            href="http://www.instagram.com"
                             className="m social"
                             >
                                 <img src = {msoc} alt = "M?"/>
