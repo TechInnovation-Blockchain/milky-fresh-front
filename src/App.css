@@ -295,6 +295,18 @@ filter: blur(20px);
 
 /* COMMUNITY */
 
+.community-div{
+  padding-top: 20px;
+
+background-image: url("./resources/images/back2.png");
+/* overflow: visible; */
+background-repeat: no-repeat;
+background-size:cover;
+
+height: 1000px;
+}
+
+
 .community-circ {
   height: 170px;
   width : 170px;
@@ -353,7 +365,7 @@ div.milkyway-icon {
   /* background-color: black; */
 
 
-  margin: 0px 0 0 0;
+  margin: -700px 0 0 0;
 
   /* box-shadow: 0 -20px rgb(0, 0, 15) inset, 0 -40px rgb(0, 10, 16) inset, 0 -60px rgb(1, 1, 20) inset, 0 -80px rgb(2, 2, 21) inset; */
 }
