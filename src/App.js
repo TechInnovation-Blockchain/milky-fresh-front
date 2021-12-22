@@ -1,14 +1,10 @@
 import './App.css';
-import Header from './components/Header';
-import Land from './components/Land';
-import Footer from './components/Footer';
-import back1 from "./resources/images/back1.png";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Dash from './components/Dash';
-import Galaxy from './components/Galaxy';
-import Community from './components/Community';
-import Partners from './components/Partners';
+// import 'font-awesome/4.7.0/css/font-awesome.min.css'
+import Home from "./components/Home";
+import Trade from './components/Trade';
+import Farms from './components/Farms';
 
 
 
@@ -18,15 +14,15 @@ function App() {
       <header className="App-header">
         {/* <img src = {back1} alt="back1" style={{postiion: 'relative'}}/> */}
 
-        <Header/>
-        <Dash/>
-        <Galaxy/>
-        <Community/>
-        <Partners/>
-        {/* <Land/> */}
+        {/* <Home/> */}
+        
+        {/* <Trade/> */}
 
-        <Footer/>
-        {/* <Footer/> */}
+        <Farms/>
+
+
+
+
         
       </header>
     </div>

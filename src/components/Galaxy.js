@@ -3,41 +3,41 @@ import {Button} from 'react-bootstrap'
 
 const Galaxy = () => {
     return (
-        <div class = "galaxy-div">
+        <div className= "galaxy-div">
 
             <div class="dimmer">
             </div>
 
-            <div class = "galaxy-back ">
+            <div className= "galaxy-back ">
             </div>
 
-            <div class = "galaxy">
+            <div className= "galaxy">
                 <h2>MilkyWay Exchange Properties</h2>
     
-                <div class = "galaxy-circle" style ={{marginLeft: "1095px", marginTop:"60px"}}>
+                <div className= "galaxy-circle" style ={{marginLeft: "56%", marginTop:"5%"}}>
                     <h5> Title</h5>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore.</p>
-                    <Button class = "dash-btn clickable">Enter</Button>
+                    <Button className= "dash-btn clickable">Enter</Button>
                 </div>
-                <div class = "galaxy-circle" style ={{marginLeft: "608px", marginTop:"-130px"}}>
+                <div className= "galaxy-circle" style ={{marginLeft: "15%", marginTop:"-7%"}}>
                     <h5> Title</h5>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore.</p>
-                    <Button class = "dash-btn clickable">Enter</Button>
+                    <Button className= "dash-btn clickable">Enter</Button>
                 </div>
-                <div class = "galaxy-circle" style ={{marginLeft: "1210px", marginTop:"39px"}}>
+                <div className= "galaxy-circle" style ={{marginLeft: "67%", marginTop:"0.1%"}}>
                     <h5> Title</h5>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore.</p>
-                    <Button class = "dash-btn clickable">Enter</Button>
+                    <Button className= "dash-btn clickable">Enter</Button>
                 </div>
-                <div class = "galaxy-circle" style ={{marginLeft: "508px", marginTop:"-90px"}}>
+                <div className= "galaxy-circle" style ={{marginLeft: "18%", marginTop:"-8%"}}>
                     <h5> Title</h5>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore.</p>
-                    <Button class = "dash-btn clickable">Enter</Button>
+                    <Button className= "dash-btn clickable">Enter</Button>
                 </div>
-                <div class = "galaxy-circle" style ={{marginLeft: "898px", marginTop:"-70px"}}>
+                <div className= "galaxy-circle" style ={{marginLeft: "46%", marginTop:"-3%"}}>
                     <h5> Title</h5>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore.</p>
-                    <Button class = "dash-btn clickable">Enter</Button>
+                    <Button className= "dash-btn clickable">Enter</Button>
                 </div>
                 
             </div>

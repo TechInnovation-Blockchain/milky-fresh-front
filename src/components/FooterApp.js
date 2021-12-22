@@ -1,20 +1,32 @@
 import React from 'react'
+
 import { Col, Container, Row } from 'react-bootstrap'
 import logo from "../resources/images/mwlogo.png"
 import twitter from "../resources/images/twittersoc.png"
 import telegram from "../resources/images/telegramsoc.png"
 import msoc from "../resources/images/msoc.png"
 
-const Footer = () => {
+
+const FooterApp = () => {
     return (
         <div style = {{padding: "80px"}}>
             <hr style = {{color: "white"}}/>
             <Container style = {{padding:"10px", textAlign : 'left'}}>
-                <Row>
+                <Row style={{width: "100%", margin:"0 auto"}}>
+
                     <Col>
-                    <img src = {logo} alt="MilkyWay"/>
-                    <p  style = {{fontSize: "12px", marginTop : "15px"}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
-                    
+                    <h5>Analytics</h5>
+
+                    </Col>
+
+                    <Col>
+                    <h5>WSG Gaming</h5>
+
+                    </Col>
+
+
+                    <Col>
+
                     <div>
                         <p className="social-container">
                             <a
@@ -36,44 +48,26 @@ const Footer = () => {
                                 <img src = {msoc} alt = "M?"/>
                             </a>
                         </p>
-                        </div>
+                    </div>
+
+                    </Col>
+
+
+
+                    <Col>
+                    <h5>Discord</h5>
 
                     </Col>
 
                     <Col>
-                    <h5>PRODUCTS</h5>
-                    <ul className= "footer-list" style = {{fontSize: "12px"}}>
-                        <li>MilkyWay.exchange AMIM</li>
-                        <li>WSG gaming</li>
-                        <li>Third stuff</li>
-                        <li>API</li>
-                    </ul>
-                    </Col>
+                    <h5>Built: 1.0.2.3.4.</h5>
 
-                    <Col>
-                    <h5>SUPPORT</h5>
-                    <ul className= "footer-list" style = {{fontSize: "12px"}}>
-                        <li>Tutorials</li>
-                        <li>Documentation</li>
-                        <li>Discord</li>
-                        <li>Forum</li>
-                    </ul>
-                    </Col>
-
-                    <Col>
-                    <h5>SUPPORT</h5>
-                    <ul className= "footer-list" style = {{fontSize: "12px"}}>
-                        <li>Protocol</li>
-                        <li>Create a pair</li>
-                        <li>Register for WSG Gaming</li>
-                    </ul>
                     </Col>
 
                 </Row>
             </Container>
-
         </div>
     )
 }
 
-export default Footer
+export default FooterApp

@@ -29,6 +29,9 @@
 
 :root {
   --darkk: #1D2B5A;
+  --dark2: #1D062C;
+  --bluepurp: #2B0E79;
+  --bluepurpdark : #1F0F4A;
   --bluedark: #030315;
   --yellow: #F7D33C;
   --pinkred: #fd496a;
@@ -49,13 +52,13 @@
 } 
 
 /* clickable */
-Button, a.social, .milky-navlink, #navbrand {
+Button, a.social, .milky-navlink, #navbrand, .trade-button {
   margin-right: 15px;
   transition: transform 250ms;
   display: inline-block;
 }
 
-Button:hover, a.social:hover, .milky-navlink:hover, #navbrand:hover {
+Button:hover, a.social:hover, .milky-navlink:hover, #navbrand:hover, .trade-button {
   transform: translateY(-2px);
 }
 
@@ -210,9 +213,10 @@ background-size:cover; */
   z-index: 5;
   position: relative;
 
+  margin: 0 auto;
   margin-top: -1000px;
 
-  width: 100%;
+  width: 55%;
   height: 100%;
   color: #fff;
   text-shadow: 0 0 3px #000;
@@ -230,7 +234,7 @@ background-size:cover; */
   
   /* padding-top: -80px; */
     background-color: black;
-    width: 2000px;
+    width: 100%;
     
     /* position:absolute; */
     /* top:0; */
@@ -321,6 +325,7 @@ height: 1000px;
   padding-top: 50px;
   /* display: flex; */
   align-items: center;
+  margin: 0 auto;
 }
 
 .community-circ p {
@@ -378,7 +383,6 @@ div.milkyway-icon {
 }
 
 .partners-circ {
-  padding-top : px;
   margin: 0 auto;
   /* background-color: var(--purp1); */
   height: 100px;
@@ -392,13 +396,199 @@ div.milkyway-icon {
 }
 
 .partners-div h5{
-  padding-top: 7px;
+  padding-top: 7%;
+  font-size: 40%;
 }
 
 
 
+/* TRADER */
+.trade-div{
+  
+  background-image: url("./resources/images/back2.png");
+  /* overflow: visible; */
+  background-repeat: no-repeat;
+  background-size:cover;
+
+  height: 1000px;
+}
+
+.trader-div{
+  background-color: var(--bluepurp);
+  border:none;
+  border-radius: 10px;
+  margin: 0 auto;
+  /* margin-top: 20px; */
+  width: 30%;
+
+  margin-top: 180px;
+  margin-bottom: 180px;
+  /* padding-top: 80px; */
+
+}
+
+.trade-from-div, .trade-to-div{
+  background-color: var(--bluepurpdark);
+  border:none;
+  border-radius: 10px;
+  margin: auto auto;
+  margin-top: 20px;
+  width: 98%;
+}
+
+.trade-from-div Form.Text, .trade-to-div Form.Text{ 
+  background-color: var(--purp1);
+  border:none;
+  border-radius: 10px;
+  margin-right: 10px;
+  margin-left: auto;
+  margin-top: 20px;
+  width: 78%;
+}
+
+.trade-from-div DropDown, .trade-to-div DropDown{
+  background-color: var(--purp1);
+  border:none;
+  border-radius: 10px;
+  margin-right: 10px;
+  margin-left: aut0;
+  margin-top: 20px;
+  width: 98%;
+}
+
+.trade-connect-btn{
+  width: 98% !important;
+  font-size: medium !important;
+  margin-top:15px !important;
+  margin-bottom:5px !important;
+  margin-left: 5px !important;
+  margin-right: 5px !important;
+  padding-left :15px !important;
+  padding-right :15px !important;
+  padding-top: 55px !important;
+  padding-bottom: 5px !important;
+  border:none !important;
+  border-radius: 10px !important;
+
+  background-image: linear-gradient(to right, var(--yellow), var(--pinkred)) !important; 
+  color : white !important;
+  box-shadow: 1px 2px 8px 1px rgba(0 , 0, 0, 0.5) !important;
+}
+
+.trade-button {
+  background-color: var(--bluepurpdark);
+  border-radius: 10px;
+  padding-top:7px;
+  padding-bottom:7px;
+  padding-left:12px;
+  padding-right:12px;
+  margin-top: 10px;
+  color:white;
+  font-size: large;
+  border: none;
+  box-shadow: 1px 2px 4px 1px rgba(0 , 0, 0, 0.5);
+}
+
+.selected-btn {
+  background-color: var(--purp3);
+  box-shadow: none;
+}
+
+.swap {
+  margin-top: 5%;
+  margin-left: -37%;
+  /* margin-right: auto; */
+}
+
+.trade-settings {
+  background-color: transparent; 
+  /* margin-right: -50px; */
+  float: right;
+  margin-top: 5%;
+
+  /* margin-left: auto; */
+  border: none;
+  box-shadow: none;
+}
 
 
 
+/* FARMS */
 
+.farm-page {
+  background-image: url("./resources/images/back2.png");
+  /* overflow: visible; */
+  background-repeat: no-repeat;
+  background-size:cover;
+  height: 970px;
+}
+
+.farms-div {
+
+  width: 70%;
+  margin : 40px auto;
+}
+
+.your-farm-btn {
+  width: 90%;
+  margin-bottom: 3%;
+
+  background: repeating-linear-gradient(
+    125deg,
+    var(--bluepurp),
+    var(--bluepurp) 8px,
+    var(--bluepurpdark) 8px,
+    var(--bluepurpdark) 15px
+  );
+  opacity: 0.7;
+  border: none !important;
+  box-shadow: 1px 1px 1px 1px rgba(0 , 0, 0, 0.3);
+  border-radius: 15px !important;
+  padding-top: 13px !important;
+  padding-bottom: 13px !important;
+}
+
+.your-farm-btn p {
+  margin-left: -30px;
+  display: block;
+  
+}
+
+
+
+.farm-btn {
+  width: 90%;
+  margin-bottom: 3%;
+  background-color: var(--bluepurpdark) !important;
+  border: none !important;
+  box-shadow: 1px 1px 1px 1px rgba(0 , 0, 0, 0.3);
+  border-radius: 15px !important;
+  padding-top: 13px !important;
+  padding-bottom: 13px !important;
+}
+
+.farm-btn p {
+  margin-left: -40px;
+  display: block;
+}
+
+.selected-farm {
+  background-color: var(--bluepurp) !important;
+  
+}
+
+.dividers hr {
+  color: var(--purp3);
+  
+}
+
+.divider-right {
+  display: inline-block;
+}
+
+.divider-right p {
+font-size: medium;
+float: left;
+padding-right: 8px;
+}
 
