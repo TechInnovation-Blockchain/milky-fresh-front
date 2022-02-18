@@ -1,0 +1,18 @@
+.navLink {
+  text-decoration: none;
+  color: white;
+  font-size: 26px;
+  font-family: "DM Sans";
+  transition: 0.3s;
+}
+.navLink:hover {
+  color: #dd38f2;
+}
+.navbtn {
+  background-color: #6a1787;
+  font-size: 20px;
+  padding: 5px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: white;
+}

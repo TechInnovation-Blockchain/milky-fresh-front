@@ -11,11 +11,20 @@ import {
   approveMasterChef,
   isErc20ApprovedMasterChef,
   getBalance,
+  connectToMetamask,
 } from "../apis/blockchain";
 import { Web3Context } from "../contexts/Web3Context";
 import { MasterChefAddress } from "../constants/addresses";
 
-const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
+const PoolItem = ({
+  ticker,
+  name,
+  apy,
+  stake,
+  tokenAddress,
+  pid,
+  backgroundColor,
+}) => {
   const web3Context = useContext(Web3Context);
 
   const [showMore, setShowMore] = useState(false);
@@ -27,6 +36,49 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
   const [isApproved, setIsApproved] = useState(false);
   const [balance, setBalance] = useState("0");
   const [totalStaked, setTotalStaked] = useState(0);
+  const [rewardsPerDay, setRewardsPerDay] = useState("0");
+
+  const depositPreflightCheck = () => {
+    if (depositAmount <= 0) {
+      return false;
+    }
+
+    if (depositAmount > balance) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const withdrawPreflightCheck = () => {
+    if (withdrawAmount <= 0) {
+      return false;
+    }
+
+    if (withdrawAmount > staked) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const claimPreflightCheck = () => {
+    if (pending <= 0) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleClick = () => {
+    if (
+      web3Context.currentAccountAddress &&
+      (window.ethereum.chainId == "0x61" || window.ethereum.chainId == 97)
+    ) {
+      setShowMore(!showMore);
+    } else {
+      connectToMetamask(web3Context.web3.metamaskProvider);
+    }
+  };
 
   useEffect(() => {
     if (web3Context.currentAccountAddress && web3Context.web3.web3Provider) {
@@ -40,6 +92,7 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
     fetchStaked();
     fetchPending();
     fetchTotalStaked();
+    fetchRewardsPerDay();
   };
 
   const fetchApproved = async () => {
@@ -58,6 +111,19 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
       web3Context.currentAccountAddress
     );
     setBalance(weiToEth(_balance));
+  };
+
+  const fetchRewardsPerDay = async () => {
+    const rewardsPerBlock =
+      await web3Context.web3.masterChefContract.sushiPerBlock();
+    const totalAllocPoints =
+      await web3Context.web3.masterChefContract.totalAllocPoint();
+    const allocPoints = (
+      await web3Context.web3.masterChefContract.poolInfo(pid)
+    ).allocPoint;
+    const _rewardsPerDay =
+      (weiToEth(rewardsPerBlock) * 28750 * allocPoints) / totalAllocPoints;
+    setRewardsPerDay(_rewardsPerDay);
   };
 
   const fetchTotalStaked = async () => {
@@ -114,18 +180,40 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
   };
 
   return (
-    <div className={styles.poolItemContainer}>
+    <div
+      className={styles.poolItemContainer}
+      style={{ backgroundColor: backgroundColor }}
+    >
       <div
         className={styles.poolItemMain}
         style={{
           borderBottomLeftRadius: showMore ? "0px" : "20px",
           borderBottomRightRadius: showMore ? "0px" : "20px",
         }}
-        onClick={() => setShowMore(!showMore)}
+        onClick={handleClick}
       >
         <div className={styles.titleSection}>
-          <div className={styles.ticker}>{ticker}</div>
-          <div className={styles.name}>{name}</div>
+          <div className={styles.ticker}>
+            {ticker}
+            <br />
+            <span className={styles.name}>{name}</span>
+          </div>
+        </div>
+
+        <div className={styles.stakedSection}>
+          <div className={styles.stakeContainer}>
+            <div className={styles.stakeTitle}>TVL</div>
+            <div className={styles.stake}>
+              {parseFloat(totalStaked).toFixed(2)}
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.rewardsSection}>
+          <div className={styles.rewardsContainer}>
+            <div className={styles.rewardsTitle}>Rewards</div>
+            <div className={styles.rewards}>{rewardsPerDay} MWT/DAY</div>
+          </div>
         </div>
 
         <div className={styles.apySection}>
@@ -135,20 +223,9 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
           </div>
         </div>
 
-        <div className={styles.stakedSection}>
-          <div className={styles.stakeContainer}>
-            <div className={styles.stakeTitle}>Total Staked</div>
-            <div className={styles.stake}>
-              {parseFloat(totalStaked).toFixed(2)}
-            </div>
-          </div>
-        </div>
-
         <div className={styles.moreSection}>
           <div className={styles.moreContainer}>
-            <span className={styles.moreText}>
-              {showMore ? "Hide" : "More"}
-            </span>
+            <span className={styles.moreText}></span>
             {showMore ? <ChevronUp /> : <ChevronDown />}
           </div>
         </div>
@@ -161,14 +238,14 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
 
             <input
               type="number"
-              placeholder="deposit amount"
+              placeholder="Deposit Amount"
               value={depositAmount}
               className={styles.depositInput}
               onInput={(e) => setDepositAmount(e.target.value)}
             />
             <p
               style={{
-                color: "black",
+                color: "white",
                 fontSize: "18px",
                 float: "left",
                 cursor: "pointer",
@@ -179,7 +256,11 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
             </p>
 
             {isApproved ? (
-              <button onClick={submitDeposit} className={styles.depositButton}>
+              <button
+                disabled={!depositPreflightCheck()}
+                onClick={submitDeposit}
+                className={styles.depositButton}
+              >
                 Deposit
               </button>
             ) : (
@@ -193,14 +274,14 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
             <div className={styles.depositTitle}>Withdraw</div>
             <input
               type="number"
-              placeholder="withdraw amount"
+              placeholder="Withdraw Amount"
               value={withdrawAmount}
               className={styles.depositInput}
               onInput={(e) => setWithdrawAmount(e.target.value)}
             />
             <p
               style={{
-                color: "black",
+                color: "white",
                 fontSize: "18px",
                 float: "left",
                 cursor: "pointer",
@@ -210,8 +291,9 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
               Staked: {parseFloat(staked).toFixed(6)}
             </p>
             <button
+              disabled={!withdrawPreflightCheck()}
+              onClick={submitWithdraw}
               className={styles.depositButton}
-              style={{ backgroundColor: "#00CED1" }}
             >
               Withdraw
             </button>
@@ -220,15 +302,19 @@ const PoolItem = ({ ticker, name, apy, stake, tokenAddress, pid }) => {
           <div className={styles.claimSection}>
             <p
               style={{
-                color: "black",
+                color: "white",
                 fontSize: "18px",
-                cursor: "pointer",
+                cursor: "default",
                 marginTop: "10px",
               }}
             >
               Pending MWT: {pending}
             </p>
-            <button onClick={submitClaim} className={styles.claimButton}>
+            <button
+              disabled={!claimPreflightCheck()}
+              onClick={submitClaim}
+              className={styles.depositButton}
+            >
               Claim
             </button>
           </div>

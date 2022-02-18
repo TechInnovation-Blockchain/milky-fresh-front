@@ -37,6 +37,7 @@ const Farms = () => {
           stake={"--"}
           tokenAddress={"0x7B19993a90f5e839066408Bca1341E016231d5A4"}
           pid={0}
+          backgroundColor={"#2B0E79"}
         />
         <PoolItem
           ticker={"MWT-BNB"}
@@ -44,7 +45,8 @@ const Farms = () => {
           apy={"--"}
           stake={"--"}
           tokenAddress={"0xaccb55780831c02f39e07ea59567b2de299b867e"}
-          pid={1}
+          pid={2}
+          backgroundColor={"#1F0F4A"}
         />
 
         <Row>

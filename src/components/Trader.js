@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from "react";
-import styles from "../App.css";
 import { Button, Dropdown, Form, DropdownButton } from "react-bootstrap";
 import { HiOutlineCog } from "react-icons/hi";
 import { Web3Context } from "../contexts/Web3Context";
@@ -15,6 +14,7 @@ import {
   getReserves,
 } from "../apis/blockchain";
 import { MilkyWayTokenAddress, WBNBAddress } from "../constants/addresses";
+import styles from "./Trader.module.css";
 
 const Trader = () => {
   const web3Context = useContext(Web3Context);
@@ -56,13 +56,23 @@ const Trader = () => {
   const [isToApproved, setIsToApproved] = useState(false);
 
   const handleToAmountChange = (value) => {
+    if (isNaN(value)) {
+      return;
+    }
     setToAmount(value);
-    setFromAmount(value * (1 / price));
+    if (price > 0) {
+      setFromAmount(value * (1 / price));
+    }
   };
 
   const handleFromAmountChange = (value) => {
+    if (isNaN(value)) {
+      return;
+    }
     setFromAmount(value);
-    setToAmount(value * price);
+    if (price > 0) {
+      setToAmount(value * price);
+    }
   };
 
   const handleFromSelect = (e) => {
@@ -93,11 +103,13 @@ const Trader = () => {
     return true;
   };
 
-  const submitSwap = async () => {
+  const submitSwap = async (e) => {
+    e.preventDefault();
+
     await swapExactTokensForTokens(
       web3Context.web3.routerContract,
-      ethToWei(fromAmount),
-      ethToWei((toAmount * 0.98).toString()),
+      ethToWei(fromAmount.toString()),
+      ethToWei((toAmount * 0.95).toString()),
       [fromToken.address, toToken.address],
       web3Context.currentAccountAddress
     );
@@ -106,7 +118,7 @@ const Trader = () => {
   };
 
   const liquidityPreflightCheck = () => {
-    if (fromAmount <= 0 || toAmount <= fromAmount) {
+    if (fromAmount <= 0 || toAmount <= 0) {
       return false;
     }
     if (fromAmount > fromBal || toAmount > toBal) {
@@ -118,13 +130,15 @@ const Trader = () => {
     return true;
   };
 
-  const submitLiquidity = async () => {
+  const submitLiquidity = async (e) => {
+    e.preventDefault();
+
     await addLiquidity(
       web3Context.web3.routerContract,
       fromToken.address,
       toToken.address,
-      ethToWei(fromAmount),
-      ethToWei(toAmount),
+      ethToWei(fromAmount.toString()),
+      ethToWei(toAmount.toString()),
       ethToWei((fromAmount * 0.99).toString()),
       ethToWei((toAmount * 0.99).toString()),
       web3Context.currentAccountAddress
@@ -133,12 +147,15 @@ const Trader = () => {
     fetchBalances();
   };
 
-  const approveFrom = async () => {
+  const approveFrom = async (e) => {
+    e.preventDefault();
     await approveRouter(web3Context.web3.web3Provider, fromToken.address);
     setIsFromApproved(true);
   };
 
-  const approveTo = async () => {
+  const approveTo = async (e) => {
+    e.preventDefault();
+
     await approveRouter(web3Context.web3.web3Provider, toToken.address);
     setIsToApproved(true);
   };
@@ -189,125 +206,185 @@ const Trader = () => {
       fromToken.address,
       toToken.address
     );
+    if (reserves[0] <= 0) {
+      return;
+    }
     setPrice(reserves[1] / reserves[0]);
     setToAmount((fromAmount * reserves[1]) / reserves[0]);
   };
 
   return (
-    <div className="trader-div">
+    <div
+      className="trader-div"
+      style={{
+        padding: "15px",
+        paddingBottom: "25px",
+        borderRadius: "10px",
+        fontFamily: "DM Sans",
+        minWidth: "700px",
+      }}
+    >
       <Form>
-        <Button
-          class="swap trade-button  selected-btn"
+        <div
+          style={{ backgroundColor: action === "swap" ? "#dd38f2" : "" }}
+          className={styles.tab}
           onClick={() => setAction("swap")}
         >
           Swap
-        </Button>
-        <Button class="trade-button" onClick={() => setAction("add")}>
+        </div>
+        <div
+          style={{ backgroundColor: action === "add" ? "#dd38f2" : "" }}
+          className={styles.tab}
+          onClick={() => setAction("add")}
+        >
           Liquidity
-        </Button>
-        <Button class="trade-button trade-settings">
-          <HiOutlineCog style={{ fontSize: "25px" }} />
-        </Button>
+        </div>
+        <div id={styles.settingsButton}>
+          <HiOutlineCog style={{ fontSize: "30px", cursor: "pointer" }} />
+        </div>
 
-        <div className="trade-from-div">
-          <h5>{action === "swap" ? "Swap from:" : ""}</h5>
+        <div
+          className="trade-from-div"
+          style={{ minHeight: "120px", padding: "15px 0" }}
+        >
+          <div className={styles.left}>
+            <h5 className={styles.swapText}>
+              {action === "swap" ? "Swap from:" : ""}
+            </h5>
 
-          <DropdownButton title={fromToken.ticker} onSelect={handleFromSelect}>
-            <Dropdown.Item eventKey="mwt">MWT</Dropdown.Item>
-            <Dropdown.Item eventKey="bnb">BNB</Dropdown.Item>
-          </DropdownButton>
+            <DropdownButton
+              className={styles.selectButton}
+              title={fromToken.ticker}
+              onSelect={handleFromSelect}
+            >
+              <Dropdown.Item eventKey="mwt">MWT</Dropdown.Item>
+              <Dropdown.Item eventKey="bnb">BNB</Dropdown.Item>
+            </DropdownButton>
+          </div>
 
-          <Form.Group>
+          <Form.Group className={styles.right}>
+            <h5 className={styles.swapText} style={{ color: "transparent" }}>
+              {action === "swap" ? "Swap from:" : ""}
+            </h5>
+
+            <Form.Control
+              value={fromAmount}
+              onChange={(e) => handleFromAmountChange(e.target.value)}
+              type="text"
+              placeholder="0.0"
+              className={styles.amountInput}
+            />
             <p
-              style={{ fontSize: "24px" }}
+              className={styles.maxText}
               onClick={() => handleFromAmountChange(fromBal)}
             >
               Max: {parseFloat(fromBal).toFixed(6)}
             </p>
-            <Form.Control
-              value={fromAmount}
-              onChange={(e) => handleFromAmountChange(e.target.value)}
-              type="number"
-              placeholder="0.0"
-            />
           </Form.Group>
         </div>
-        <div className="trade-to-div">
-          <h5>{action === "swap" ? "Swap to:" : ""}</h5>
+        <div
+          className="trade-to-div"
+          style={{ minHeight: "120px", padding: "15px 0" }}
+        >
+          <div className={styles.left}>
+            <h5 className={styles.swapText}>
+              {action === "swap" ? "Swap to:" : ""}
+            </h5>
 
-          <DropdownButton title={toToken.ticker} onSelect={handleToSelect}>
-            <Dropdown.Item eventKey="mwt">MWT</Dropdown.Item>
-            <Dropdown.Item eventKey="bnb">BNB</Dropdown.Item>
-          </DropdownButton>
-          <Form.Group>
+            <DropdownButton
+              className={styles.selectButton}
+              title={toToken.ticker}
+              onSelect={handleToSelect}
+            >
+              <Dropdown.Item eventKey="mwt">MWT</Dropdown.Item>
+              <Dropdown.Item eventKey="bnb">BNB</Dropdown.Item>
+            </DropdownButton>
+          </div>
+
+          <Form.Group className={styles.right}>
+            <h5 className={styles.swapText} style={{ color: "transparent" }}>
+              {action === "swap" ? "Swap from:" : ""}
+            </h5>
+
+            <Form.Control
+              value={toAmount}
+              className={styles.amountInput}
+              onChange={(e) => handleToAmountChange(e.target.value)}
+              type="text"
+              placeholder="0.0"
+            />
+
             <p
-              style={{ fontSize: "24px" }}
+              className={styles.maxText}
               onClick={() => handleToAmountChange(toBal)}
             >
               Max: {parseFloat(toBal).toFixed(6)}
             </p>
-
-            <Form.Control
-              value={toAmount}
-              onChange={(e) => handleToAmountChange(e.target.value)}
-              type="number"
-              placeholder="0.0"
-            />
           </Form.Group>
         </div>
 
-        <p style={{ fontSize: "18px", marginTop: "10px" }}>
-          {price &&
-            price.toFixed(6) +
+        {fromToken.ticker !== toToken.ticker && price && price > 0 ? (
+          <p style={{ fontSize: "18px", marginTop: "10px" }}>
+            {price.toFixed(6) +
               " " +
               toToken.ticker +
               " per " +
               fromToken.ticker}
-        </p>
+          </p>
+        ) : null}
 
         {web3Context.currentAccountAddress &&
         (window.ethereum.chainId == "0x61" || window.ethereum.chainId == 97) ? (
           action === "swap" ? (
             isfromApproved ? (
-              <Button
-                className="trade-confirm-btn"
+              <button
+                className={styles.confirmButton}
                 disabled={!swapPreflightCheck()}
                 onClick={submitSwap}
               >
                 Swap
-              </Button>
+              </button>
             ) : (
-              <Button
-                className="trade-confirm-btn"
+              <button
+                className={styles.confirmButton}
                 disabled={!swapPreflightCheck()}
                 onClick={approveFrom}
               >
                 Approve
-              </Button>
+              </button>
             )
           ) : (
             <>
               {!isfromApproved && (
-                <Button className="trade-confirm-btn" onClick={approveFrom}>
+                <button className={styles.confirmButton} onClick={approveFrom}>
                   Approve {fromToken.ticker}
-                </Button>
+                </button>
               )}
 
               {!isToApproved && (
-                <Button className="trade-confirm-btn" onClick={approveTo}>
+                <button className={styles.confirmButton} onClick={approveTo}>
                   Approve {toToken.ticker}
-                </Button>
+                </button>
               )}
 
               {isfromApproved && isToApproved && (
-                <Button className="trade-confirm-btn" onClick={submitLiquidity}>
+                <button
+                  className={styles.confirmButton}
+                  disabled={!liquidityPreflightCheck()}
+                  onClick={submitLiquidity}
+                >
                   Add Liquidity
-                </Button>
+                </button>
               )}
             </>
           )
         ) : (
-          <Button className="trade-connect-btn">Connect Wallet</Button>
+          <button
+            onClick={() => connectToMetamask(web3Context.web3.metamaskProvider)}
+            className="trade-connect-btn"
+          >
+            Connect Wallet
+          </button>
         )}
       </Form>
     </div>

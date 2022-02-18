@@ -4,6 +4,7 @@ import { Container, Navbar, Dropdown, Button } from "react-bootstrap";
 import { FaEllipsisH } from "react-icons/fa";
 import { Web3Context } from "../contexts/Web3Context";
 import { connectToMetamask } from "../apis/blockchain";
+import styles from "./HeaderApp.module.css";
 
 const HeaderApp = () => {
   const web3Context = useContext(Web3Context);
@@ -15,36 +16,40 @@ const HeaderApp = () => {
   };
 
   return (
-    <div className="milkynavapp" style={{ alignItems: "left" }}>
+    <div
+      className="milkynavapp"
+      style={{ alignItems: "left", marginTop: "20px" }}
+    >
       <Navbar style={{ alignItems: "left" }}>
         <Container>
           <Navbar.Brand id="navbrandapp" href="/">
             <img src={logo} alt="Milkyway" style={{ alignSelf: "left" }} />
           </Navbar.Brand>
-          <a href="/swap" target="_self" class="milkyapp-navlink">
+          <a href="/swap" target="_self" className={styles.navLink}>
             Swap
           </a>
-          <a href="/farm" target="_self" class="milkyapp-navlink">
+          <a href="/farm" target="_self" className={styles.navLink}>
             Farm
           </a>
 
           {web3Context.currentAccountAddress &&
           (window.ethereum.chainId == "0x61" ||
             window.ethereum.chainId == 97) ? (
-            <Button className="milkyapp-navbtn">
+            <div className="wallet-address">
               {truncateAddress(web3Context.currentAccountAddress)}
-            </Button>
+            </div>
           ) : (
-            <Button
-              className="milkyapp-navbtn"
+            <div
+              className={styles.navbtn}
               onClick={() =>
                 connectToMetamask(web3Context.web3.metamaskProvider)
               }
             >
               Connect Wallet
-            </Button>
+            </div>
           )}
 
+          {/*
           <Dropdown className="nav-language">
             <Dropdown.Toggle variant="success" id="language-dropdown">
               English
@@ -60,7 +65,7 @@ const HeaderApp = () => {
           <Button className="nav-settings">
             <FaEllipsisH />
           </Button>
-          {/* <Button className= "milkyapp-navbtn"></Button> */}
+           <Button className= "milkyapp-navbtn"></Button> */}
         </Container>
       </Navbar>
     </div>
