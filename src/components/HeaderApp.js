@@ -21,16 +21,23 @@ const HeaderApp = () => {
       style={{ alignItems: "left", marginTop: "20px" }}
     >
       <Navbar style={{ alignItems: "left" }}>
-        <Container>
-          <Navbar.Brand id="navbrandapp" href="/">
-            <img src={logo} alt="Milkyway" style={{ alignSelf: "left" }} />
-          </Navbar.Brand>
-          <a href="/swap" target="_self" className={styles.navLink}>
-            Swap
-          </a>
-          <a href="/farm" target="_self" className={styles.navLink}>
-            Farm
-          </a>
+        <Container className="headerApp">
+          <div>
+            <Navbar.Brand id="navbrandapp" href="/">
+              <img src={logo} alt="Milkyway" style={{ alignSelf: "left" }} />
+            </Navbar.Brand>
+          </div>
+          <div>
+            <a href="/swap" target="_self" className={styles.navLink}>
+              Swap
+            </a>
+          </div>
+
+          <div>
+            <a href="/farm" target="_self" className={styles.navLink}>
+              Farm
+            </a>
+          </div>
 
           {web3Context.currentAccountAddress &&
           (window.ethereum.chainId == "0x61" ||

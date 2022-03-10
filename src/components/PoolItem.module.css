@@ -3,6 +3,7 @@
   box-sizing: border-box;
   margin-top: 30px;
   font-family: "DM Sans";
+  height: fit-content;
 }
 
 .poolItemMain {
@@ -224,4 +225,23 @@
   font-weight: 600;
   color: white;
   align-self: center;
+}
+
+@media only screen and (max-width: 760px) {
+  .poolItemMain {
+    padding: 10px 25px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .poolItemExtra {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .poolItemExtra > div {
+    flex-grow: 1;
+    text-align: center;
+  }
 }

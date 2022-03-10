@@ -26,11 +26,11 @@ const Dash = () => {
             src={logo}
             alt="MilkyWay Exchange"
             href="/"
-            style={{ width: "605px", paddingTop: "130px" }}
+            style={{ width: "100%", paddingTop: "130px" }}
           />
           <p
             style={{
-              width: "690px",
+              maxWidth: "95%",
               textAlign: "center",
               fontSize: "12px",
               paddingTop: "50px",

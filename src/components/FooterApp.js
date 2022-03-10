@@ -8,7 +8,7 @@ import msoc from "../resources/images/msoc.png";
 
 const FooterApp = () => {
   return (
-    <div style={{ padding: "80px" }}>
+    <div className="footer-app" style={{ padding: "80px" }}>
       <hr style={{ color: "white" }} />
       <Container style={{ padding: "10px", textAlign: "left" }}>
         <Row style={{ width: "100%", margin: "0 auto" }}>
@@ -38,10 +38,6 @@ const FooterApp = () => {
 
           <Col>
             <h5>Discord</h5>
-          </Col>
-
-          <Col>
-            <h5>Built: 1.0.2.3.4.</h5>
           </Col>
         </Row>
       </Container>

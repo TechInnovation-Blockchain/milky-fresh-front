@@ -11,7 +11,7 @@ const Footer = () => {
       <hr style={{ color: "white" }} />
       <Container style={{ padding: "10px", textAlign: "left" }}>
         <Row>
-          <Col>
+          <Col style={{ marginBottom: "60px" }}>
             <img src={logo} alt="MilkyWay" />
             <p style={{ fontSize: "12px", marginTop: "15px" }}>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
