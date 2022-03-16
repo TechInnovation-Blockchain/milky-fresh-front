@@ -1,5 +1,6 @@
 import React, { useEffect, createRef } from "react";
 import { Button } from "react-bootstrap";
+import GalaxyLogo from "../resources/images/galaxyLogo.svg";
 
 const Galaxy = () => {
   const galaxyRef = createRef();
@@ -22,7 +23,7 @@ const Galaxy = () => {
       <div className="galaxy-back" ref={galaxyRef}></div>
 
       <div className="galaxy">
-        <h2>MilkyWay Exchange Properties</h2>
+        <h2 className="galaxy-title">MilkyWay Exchange properties</h2>
 
         <div
           className="galaxy-circle"
@@ -80,6 +81,8 @@ const Galaxy = () => {
           <Button className="dash-btn clickable">Enter</Button>
         </div>
       </div>
+
+      <img className={"galaxy-logo"} src={GalaxyLogo}></img>
     </div>
   );
 };

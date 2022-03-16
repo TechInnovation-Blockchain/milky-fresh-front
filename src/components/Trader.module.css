@@ -5,11 +5,8 @@
   font-family: "DM Sans";
   cursor: pointer;
   background-color: var(--bluepurpdark);
-  border-radius: 10px;
-  padding-top: 7px;
-  padding-bottom: 7px;
-  padding-left: 12px;
-  padding-right: 12px;
+  border-radius: 18px;
+  padding: 12px 20px;
   margin-top: 10px;
   color: white;
   font-size: large;

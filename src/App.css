@@ -98,8 +98,9 @@ a.social:hover,
 .milkynav {
   width: 100%;
   margin: 0 auto;
-  background-image: url("./resources/images/back1.png");
-  background-repeat: no-repeat;
+  background: transparent;
+  font-family: "DM Sans";
+  margin-top: -3px;
 }
 
 .milkynav Button {
@@ -108,10 +109,10 @@ a.social:hover,
   color: white;
   box-shadow: 1px 2px 8px 1px rgba(0, 0, 0, 0.5);
 
-  border-radius: 18px;
+  border-radius: 28px;
   margin: 7px;
   font-size: large;
-  padding: 8px 18px;
+  padding: 8px 24px;
 }
 
 .milky-navlink {
@@ -168,33 +169,42 @@ background-size:cover; */
 }
 
 .dash-btn {
-  border-radius: 18px;
-  margin: 7px;
-  font-size: 12px;
-  padding: 8px 18px;
+  border-radius: 28px;
+  margin: 12px;
+  font-size: 14px;
+  padding: 8px 30px;
+}
+.dash-btn1 {
+  box-shadow: 1px 2px 8px 1px rgb(92, 93, 95);
 }
 .dash-btn2 {
   background-image: none;
-  background-color: white;
-  color: black;
+  background-color: #4a1062;
+  color: white;
   border: none;
-  box-shadow: 1px 2px 8px 1px rgb(92, 93, 95);
 }
 
 .dash-circ {
-  height: 160px;
-  width: 160px;
-  border-radius: 90px;
+  height: 202px;
+  width: 202px;
+  border-radius: 110px;
   background-color: var(--purp1);
-  padding-top: 50px;
+  padding-top: 70px;
   /* display: flex; */
   align-items: center;
   margin: auto;
-  margin-bottom: 50px;
+  font-family: "DM Sans";
+}
+
+.dash-circ h2 {
+  font-weight: bold;
+  font-size: 44px;
+  margin-bottom: 0px;
+  line-height: 44px;
 }
 
 .dash-circ p {
-  font-size: 10px;
+  font-size: 14px;
   color: var(--purp3);
 }
 
@@ -211,6 +221,29 @@ background-size:cover; */
   /* width: 200px; */
   height: 200px;
   position: relative;
+}
+
+.galaxy-div {
+  height: fit-content;
+  position: relative;
+  width: 100%;
+}
+
+.galaxy-title {
+  font-size: 38px;
+  font-family: "DM Sans";
+  font-weight: bold;
+  line-height: 48px;
+}
+
+.galaxy-logo {
+  position: absolute;
+  left: calc(50% - 10px) !important;
+  top: calc(50% + 90px);
+  width: 124px;
+  height: 80px;
+  margin: auto !important;
+  transform: translate(-50%, -50%);
 }
 
 .galaxy {
@@ -243,6 +276,22 @@ background-size:cover; */
   .galaxy-circle {
     margin: auto !important;
     margin-top: 70px !important;
+  }
+  .galaxy-logo {
+    display: none;
+  }
+  .dash-circ,
+  .community-circ-container {
+    margin-bottom: 30px !important;
+  }
+  .milky-navlink {
+    margin: 0;
+  }
+
+  .milkynav Button {
+    padding: 5px 10px;
+    margin-right: 0;
+    margin-left: 0;
   }
 }
 
@@ -288,7 +337,6 @@ background-size:cover; */
 
 .galaxy-circle {
   padding: 29px;
-  background-color: var(--purp1);
 
   height: 202px;
   width: 202px;
@@ -305,10 +353,11 @@ background-size:cover; */
 .galaxy-circle Button {
   font-size: 15px;
   padding: 5px 13px;
-  border-radius: 15px;
+  border-radius: 30px;
 
-  margin: 38px;
-  padding: 8px 18px;
+  margin: auto;
+  margin-top: 10px;
+  padding: 8px 20px;
 }
 
 /* COMMUNITY */
@@ -330,26 +379,57 @@ background-size:cover; */
   padding-bottom: 30px;
 }
 
+.community-circ-container {
+  height: 202px;
+  min-width: 202px;
+  flex-basis: auto;
+  border-radius: 110px;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.community-circ-container,
+.galaxy-circle {
+  background: #1c1946; /* Old browsers */
+  background: -moz-linear-gradient(
+    top,
+    #360c47 0%,
+    #1c1946 100%
+  ); /* FF3.6-15 */
+  background: -webkit-linear-gradient(
+    top,
+    #360c47 0%,
+    #1c1946 100%
+  ); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(
+    to bottom,
+    #360c47 0%,
+    #1c1946 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#360C47', endColorstr='#1c1946',GradientType=0 ); /* IE6-9 */
+}
+
 .community-circ {
-  height: 170px;
-  width: 170px;
-  border-radius: 95px;
-  background-color: var(--purp1);
-  padding-top: 50px;
+  display: inline-block;
+  height: 202px;
+  max-width: 202px;
+  padding: 0;
   /* display: flex; */
   align-items: center;
-  margin: 0 auto;
-  margin-bottom: 50px;
 }
 
 .community-circ p {
   font-size: 14px;
   color: var(--purp3);
-  margin-top: -30px;
 }
 
 .community-circ h2 {
-  padding-top: 18%;
+  padding-top: 98px;
+  padding-bottom: 0;
+  margin: 0;
 }
 
 div.wallets-icon {
@@ -386,6 +466,7 @@ div.milkyway-icon {
   /* background-color: black; */
 
   margin: 0;
+  font-family: "DM Sans";
 
   /* box-shadow: 0 -20px rgb(0, 0, 15) inset, 0 -40px rgb(0, 10, 16) inset, 0 -60px rgb(1, 1, 20) inset, 0 -80px rgb(2, 2, 21) inset; */
 }
@@ -401,11 +482,13 @@ div.milkyway-icon {
   background-position-x: center;
   background-position-y: center;
   background-repeat: no-repeat;
+  font-weight: bold;
 }
 
 .partners-div h5 {
   padding-top: 7%;
   font-size: 40%;
+  font-weight: bold;
 }
 
 /* TRADER */
@@ -418,11 +501,18 @@ div.milkyway-icon {
   min-height: 100vh;
 }
 
+.trade-content {
+  min-height: calc(100vh - 200px);
+}
+
 .trader-div {
   background-color: var(--bluepurp);
   border: none;
-  border-radius: 10px;
+  border-radius: 30px;
   margin: 0 auto;
+  padding: 3px;
+  padding-top: 35px;
+  padding-bottom: 8px;
   /* margin-top: 20px; */
   width: 30%;
 
@@ -472,7 +562,7 @@ div.milkyway-icon {
   margin-right: 5px !important;
   padding: 15px;
   border: none !important;
-  border-radius: 10px !important;
+  border-radius: 20px !important;
 
   background-image: linear-gradient(
     to right,
@@ -594,13 +684,84 @@ div.milkyway-icon {
 
 .wallet-address {
   background-color: #6a1787;
-  font-size: 20px;
-  padding: 5px 15px;
-  border-radius: 10px;
+  font-size: 18px;
+  padding: 7px 21px;
+  border-radius: 50px;
   cursor: default;
+  min-width: 170px;
+  margin-right: 30px;
+  float: right !important;
+}
+
+.footer-list,
+.footer-list li {
+  margin: 0;
+  padding: 0;
+}
+
+.footerContainer {
+  font-family: "Open Sans";
+}
+
+.footerContainer h5 {
+  font-weight: bold;
+  margin-bottom: 23px;
+}
+
+.footer-list li {
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+.footer-list li:hover {
+  text-decoration: underline white solid 1px;
+}
+
+.footerLogo {
+  margin-right: 60px;
+  min-width: min(530px, 100%);
+}
+
+.headerApp {
+  justify-content: flex-start !important;
+  min-width: calc(100% - 210px) !important;
+  margin: 0 !important;
+  margin-left: 10px !important;
+}
+
+.footer-app {
+  font-family: "Montserrat";
+  padding-bottom: 0 !important;
+}
+
+.footer-app h5 {
+  font-size: 14px;
+  text-align: center;
+}
+
+.footer-app > div {
+  padding: 0;
+  margin: 0;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+.social-container {
+  margin-top: -10px !important;
+}
+
+@media only screen and (max-width: 500px) {
+  .wallet-address {
+    margin-top: 40px;
+  }
 }
 
 @media only screen and (max-width: 760px) {
+  .wallet-address {
+    font-size: 14px;
+    min-width: 150px;
+    margin-right: 20px;
+  }
   .trader-div {
     width: 90% !important;
     min-width: 0 !important;
@@ -621,7 +782,7 @@ div.milkyway-icon {
     display: flex;
     flex-wrap: wrap !important;
     width: 100%;
-    justify-content: space-around;
+    margin-top: 10px !important;
   }
 
   .farms-div {
@@ -633,5 +794,18 @@ div.milkyway-icon {
     flex-shrink: 0;
     margin: 10px;
     margin-top: 0px;
+  }
+
+  .footer-list {
+    margin-bottom: 30px;
+  }
+
+  .footerLogo {
+    margin-bottom: 30px;
+    padding-right: 0;
+  }
+  .social-container {
+    padding-top: 10px;
+    text-align: left;
   }
 }

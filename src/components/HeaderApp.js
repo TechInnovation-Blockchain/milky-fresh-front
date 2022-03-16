@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import logo from "../resources/images/mwlogo.png";
+import logo from "../resources/images/appLogo.svg";
 import { Container, Navbar, Dropdown, Button } from "react-bootstrap";
 import { FaEllipsisH } from "react-icons/fa";
 import { Web3Context } from "../contexts/Web3Context";
@@ -18,7 +18,11 @@ const HeaderApp = () => {
   return (
     <div
       className="milkynavapp"
-      style={{ alignItems: "left", marginTop: "20px" }}
+      style={{
+        alignItems: "left",
+        backgroundColor: "#1D062C",
+        paddingBottom: "5px",
+      }}
     >
       <Navbar style={{ alignItems: "left" }}>
         <Container className="headerApp">
@@ -39,23 +43,6 @@ const HeaderApp = () => {
             </a>
           </div>
 
-          {web3Context.currentAccountAddress &&
-          (window.ethereum.chainId == "0x61" ||
-            window.ethereum.chainId == 97) ? (
-            <div className="wallet-address">
-              {truncateAddress(web3Context.currentAccountAddress)}
-            </div>
-          ) : (
-            <div
-              className={styles.navbtn}
-              onClick={() =>
-                connectToMetamask(web3Context.web3.metamaskProvider)
-              }
-            >
-              Connect Wallet
-            </div>
-          )}
-
           {/*
           <Dropdown className="nav-language">
             <Dropdown.Toggle variant="success" id="language-dropdown">
@@ -74,6 +61,20 @@ const HeaderApp = () => {
           </Button>
            <Button className= "milkyapp-navbtn"></Button> */}
         </Container>
+
+        {web3Context.currentAccountAddress &&
+        (window.ethereum.chainId == "0x61" || window.ethereum.chainId == 97) ? (
+          <div className="wallet-address">
+            {truncateAddress(web3Context.currentAccountAddress)}
+          </div>
+        ) : (
+          <div
+            className={styles.navbtn}
+            onClick={() => connectToMetamask(web3Context.web3.metamaskProvider)}
+          >
+            Connect Wallet
+          </div>
+        )}
       </Navbar>
     </div>
   );

@@ -1,7 +1,8 @@
 import Button from "@restart/ui/esm/Button";
 import React from "react";
 import { Col, Row, Container } from "react-bootstrap";
-import logo from "../resources/images/mwex.png";
+import logo from "../resources/images/mwex.svg";
+import subTitle from "../resources/images/mwex2.svg";
 
 const Dash = () => {
   return (
@@ -26,15 +27,16 @@ const Dash = () => {
             src={logo}
             alt="MilkyWay Exchange"
             href="/"
-            style={{ width: "100%", paddingTop: "130px" }}
+            style={{ width: "75%", paddingTop: "130px" }}
           />
           <p
             style={{
               maxWidth: "95%",
               textAlign: "center",
-              fontSize: "12px",
+              fontSize: "18px",
               paddingTop: "50px",
               paddingBottom: "50px",
+              fontFamily: "Open Sans",
             }}
           >
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do

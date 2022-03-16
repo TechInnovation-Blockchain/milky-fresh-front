@@ -217,16 +217,16 @@ const Trader = () => {
     <div
       className="trader-div"
       style={{
-        padding: "15px",
-        paddingBottom: "25px",
-        borderRadius: "10px",
         fontFamily: "DM Sans",
         minWidth: "700px",
       }}
     >
       <Form>
         <div
-          style={{ backgroundColor: action === "swap" ? "#dd38f2" : "" }}
+          style={{
+            marginLeft: "25px",
+            backgroundColor: action === "swap" ? "#dd38f2" : "",
+          }}
           className={styles.tab}
           onClick={() => setAction("swap")}
         >
