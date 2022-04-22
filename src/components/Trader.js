@@ -14,6 +14,7 @@ import {
   getReserves,
 } from "../apis/blockchain";
 import { MilkyWayTokenAddress, WBNBAddress } from "../constants/addresses";
+import DownIcon from "../assets/pink-down.svg";
 import styles from "./Trader.module.css";
 
 const Trader = () => {
@@ -54,6 +55,11 @@ const Trader = () => {
 
   const [isfromApproved, setIsFromApproved] = useState(false);
   const [isToApproved, setIsToApproved] = useState(false);
+
+  const switchFromTo = () => {
+    setFromToken(toToken);
+    setToToken(fromToken);
+  };
 
   const handleToAmountChange = (value) => {
     if (isNaN(value)) {
@@ -282,6 +288,11 @@ const Trader = () => {
             </p>
           </Form.Group>
         </div>
+
+        <div className={styles.fromToButton} onClick={switchFromTo}>
+          <img src={DownIcon} style={{ width: "18px", marginTop: "-32px" }} />
+        </div>
+
         <div
           className="trade-to-div"
           style={{ minHeight: "120px", padding: "15px 0" }}

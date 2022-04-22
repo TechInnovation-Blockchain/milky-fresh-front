@@ -24,13 +24,27 @@
 }
 #settingsButton:hover {
 }
+.fromToButton {
+  background-color: #1f0f4a;
+  border: 5px solid #2b0e79;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  border-radius: 15px;
+  padding: 0;
+  margin-top: -16px;
+  position: absolute;
+  margin-left: 85px;
+  cursor: pointer;
+}
 .swapText {
   font-size: 14px;
-  margin-top: 3px;
+  margin-top: 8px;
   margin-bottom: 0;
-  text-align: center;
+  text-align: left;
   width: 100%;
   margin-bottom: 5px;
+  margin-left: 8px;
 }
 .left {
   float: left;

@@ -8,7 +8,7 @@ const Community = () => {
   return (
     <div class="community-div">
       <br />
-      <h2 className="galaxy-title">MilkyWay`s evolving community</h2>
+      <h2 className="galaxy-title">MilkyWay's evolving community</h2>
       <Row style={{ width: "70%", margin: "0 auto", paddingTop: "50px" }}>
         <Col className="community-circ-container">
           <div className="community-circ wallets-icon">

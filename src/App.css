@@ -382,7 +382,7 @@ background-size:cover; */
 .community-circ-container {
   height: 202px;
   min-width: 202px;
-  flex-basis: auto;
+  max-width: 202px;
   border-radius: 110px;
   margin: 0 auto;
   padding: 0;
@@ -527,8 +527,14 @@ div.milkyway-icon {
   border: none;
   border-radius: 10px;
   margin: auto auto;
-  margin-top: 20px;
   width: 98%;
+}
+
+.trade-from-div {
+  margin-top: 20px;
+}
+.trade-to-div {
+  margin-top: 8px;
 }
 
 .trade-from-div Form.Text,
