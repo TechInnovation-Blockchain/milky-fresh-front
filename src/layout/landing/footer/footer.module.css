@@ -1,0 +1,8 @@
+.btn {
+  margin-right: "0.5rem"
+}
+
+.btn:hover {
+  cursor: 'pointer';
+  transform: scale(1.2);
+}

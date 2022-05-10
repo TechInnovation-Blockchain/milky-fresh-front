@@ -1,0 +1,228 @@
+import { useState, useEffect, useRef } from 'react'
+import {
+	Box, Stack, Link, Button, TextField, IconButton,
+	Popper, ClickAwayListener, Paper, Grow, MenuItem, MenuList
+} from '@mui/material'
+import { styled } from '@mui/material/styles'
+import { MoreHoriz as MoreIcon } from '@mui/icons-material'
+import useResponsive from 'hooks/useResponsive'
+import Logo from 'components/Logo'
+import { useCallback, useReducer } from 'react'
+import { reducer, initialState, web3Modal } from 'utils/web3Modal'
+import { providers } from 'ethers'
+import { useAppContext } from 'context/WalletContext'
+import { setupProvider } from 'utils/integrate'
+import { ethers } from 'ethers'
+
+const LinkStyle = styled(Link)(() => ({
+	color: 'white',
+	textDecoration: 'none',
+	fontSize: 14,
+}));
+
+const ButtonStyle = styled(Button)(() => ({
+	backgroundColor: '#4A1062',
+	borderRadius: '20px',
+	padding: '5.25px 16px',
+	textTransform: 'capitalize',
+}));
+
+const languages = [
+	{ label: 'English', value: 'en' },
+];
+const options = [
+	'SWAP', 'FARM', 'CONNECT WALLET',
+];
+
+const Header = () => {
+	const [appState, setAppState] = useAppContext()
+	const { provider, web3Provider, address, chainId } = appState
+
+	const isMobile = useResponsive('between', 'sm', 1, 680);
+	const [open, setOpen] = useState(false);
+	const anchorRef = useRef<HTMLButtonElement>(null);
+	const [selectedIndex, setSelectedIndex] = useState(0);
+
+	const getSubAddress = (str: string) => {
+		return `${str.substring(0, 5)}...${str.substring(
+			str.length - 3,
+			str.length
+		)}`
+	}
+
+	const connect = useCallback(async function () {
+		// This is the initial `provider` that is returned when
+		// using web3Modal to connect. Can be MetaMask or WalletConnect.
+		const provider = await web3Modal.connect()
+
+		// We plug the initial `provider` into ethers.js and get back
+		// a Web3Provider. This will add on methods from ethers.js and
+		// event listeners such as `.on()` will be different.
+		const web3Provider = new providers.Web3Provider(provider)
+
+		const signer = web3Provider.getSigner()
+		const address = await signer.getAddress()
+		const network = await web3Provider.getNetwork()
+
+		setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+
+	}, [])
+
+	const disconnect = useCallback(
+		async function () {
+			await web3Modal.clearCachedProvider()
+			if (provider?.disconnect && typeof provider.disconnect === 'function') {
+				await provider.disconnect()
+			}
+
+			setAppState({ ...appState, provider: null, web3Provider: null, address: '', chainId: -1 })
+
+		},
+		[provider]
+	)
+
+	// Auto connect to the cached provider
+	useEffect(() => {
+		if (web3Modal.cachedProvider) {
+			connect()
+		}
+	}, [connect])
+
+	useEffect(() => {
+		if (appState.provider?.on) {
+			const handleAccountsChanged = (accounts: string[]) => {
+				// eslint-disable-next-line no-console
+				console.log('accountsChanged', accounts)
+
+			}
+
+			const handleDisconnect = (error: { code: number; message: string }) => {
+				// eslint-disable-next-line no-console
+				console.log('disconnect', error)
+				disconnect()
+			}
+
+			provider.on('accountsChanged', handleAccountsChanged)
+			provider.on('disconnect', handleDisconnect)
+
+			setupProvider(appState)
+
+			// Subscription Cleanup
+			return () => {
+				if (provider.removeListener) {
+					provider.removeListener('accountsChanged', handleAccountsChanged)
+					provider.removeListener('disconnect', handleDisconnect)
+				}
+			}
+		} else {
+			setupProvider(null)
+		}
+	}, [appState.provider, disconnect])
+
+	const handleMenuItemClick = (
+		event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+		index: number,
+	) => {
+		setSelectedIndex(index);
+		if (index === 2) {
+			connect();
+		}
+		setOpen(false);
+	};
+
+	const handleToggle = () => {
+		setOpen((prevOpen) => !prevOpen);
+	};
+
+	const handleClose = (event: Event) => {
+		if (
+			anchorRef.current &&
+			anchorRef.current.contains(event.target as HTMLElement)
+		) {
+			return;
+		}
+		setOpen(false);
+	};
+
+	return (
+		<Box sx={{
+			px: 5,
+			py: '14px',
+			bgcolor: '#1D062C',
+			display: 'flex',
+			alignItems: 'center',
+		}}>
+			<Stack direction="row" spacing={12}>
+				<Link href="/">
+					<Logo />
+				</Link>
+				{
+					!isMobile && (
+						<Stack direction="row" spacing={5}>
+							<LinkStyle href="/swap">Swap</LinkStyle>
+							<LinkStyle href='/farm'>Farm</LinkStyle>
+						</Stack>
+					)
+				}
+			</Stack>
+			<Box sx={{ flexGrow: 1 }} />
+			{
+				!isMobile && (
+					<Stack direction="row" spacing={1.5} alignItems="center">
+						<ButtonStyle variant='contained' onClick={appState.web3Provider ? disconnect : connect}>{appState.web3Provider ? getSubAddress(address as string) : 'Connect Wallet'}</ButtonStyle>
+					</Stack>
+				)
+			}
+			<IconButton
+				color="secondary"
+				sx={{ p: 1 }}
+				aria-controls={open ? 'split-button-menu' : undefined}
+				aria-expanded={open ? 'true' : undefined}
+				aria-label="select merge strategy"
+				aria-haspopup="menu"
+				onClick={handleToggle}
+				ref={anchorRef}
+			>
+				<MoreIcon />
+			</IconButton>
+			<Popper
+				open={open}
+				anchorEl={anchorRef.current}
+				role={undefined}
+				transition
+				disablePortal
+				style={{ zIndex: 2 }}
+			>
+				{({ TransitionProps, placement }) => (
+					<Grow
+						{...TransitionProps}
+						style={{
+							transformOrigin:
+								placement === 'bottom' ? 'center top' : 'center bottom',
+						}}
+					>
+						<Paper>
+							<ClickAwayListener onClickAway={handleClose}>
+								<MenuList id="split-button-menu">
+									{options.map((option, index) => (
+										<MenuItem
+											key={option}
+											selected={index === selectedIndex}
+											onClick={(event) => handleMenuItemClick(event, index)}
+										>
+											{
+												index === 2 && appState.web3Provider ? 'Disconnect' : option
+											}
+										</MenuItem>
+									))}
+								</MenuList>
+							</ClickAwayListener>
+						</Paper>
+					</Grow>
+				)}
+			</Popper>
+		</Box>
+	);
+};
+
+export default Header;

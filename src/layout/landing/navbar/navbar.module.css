@@ -1,0 +1,59 @@
+:root {
+  --whiteColor: white;
+  --orangeColor: orange;
+  --btnColor: linear-gradient(
+    101deg,
+    rgba(195, 179, 34, 1) 0%,
+    rgba(253, 61, 45, 0.9560866582961309) 100%
+  );
+}
+
+.nav {
+  padding: 5px;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav__menu ul {
+  display: flex;
+}
+
+@media screen and (max-width: 460px) {
+  .nav {
+    flex-direction: column;
+  }
+  
+  .nav__menu ul {
+    justify-content: flex-end;
+  }
+}
+
+.nav__menu ul li {
+  margin-top: -5px;
+  list-style: none;
+  padding: 5px 24px 0px 0px;
+}
+
+.nav__menu ul li:hover {
+  transform: scale(1.1)
+}
+
+.nav__menu ul li a {
+  text-decoration: none;
+  font-size: 14px;
+  color: var(--whiteColor);
+  border-radius: 60px;
+}
+
+.nav__menu ul li:nth-child(2) {
+  background: var(--btnColor);
+  color: var(--whiteColor);
+  font-weight: normal;
+  /* width: 150px; */
+  padding: 7px 20px;
+  border-radius: 60px;
+  border: none;
+  margin-left: 10px;
+}
