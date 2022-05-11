@@ -11,11 +11,14 @@ const Navbar = () => (
     </div>
     <div className={style.nav__menu}>
       <ul>
-        <li>
-          <a href="#">Analytics</a>
+      <li>
+        <a href="https://docs.milkyway.exchange/">Docs</a>
         </li>
         <li>
-          <a href="/swap">Milky App</a>
+          <a href="/farm">Farms</a>
+        </li>
+        <li>
+          <a href="/swap">Launch App</a>
         </li>
       </ul>
     </div>
