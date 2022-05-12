@@ -122,7 +122,7 @@ const Pool = ({ lpPair, lpBalance, lpTotalSupply, reserveA, reserveB, rate, upda
                 </Box>
                 <div style={{ color: '#fff' }}>
                     {
-                        parseFloat(lpBalance) >= 0 && parseFloat(lpTotalSupply) > 0 && reserveA >= 0 ? parseFloat((parseFloat(lpBalance) / parseFloat(lpTotalSupply) * reserveA).toFixed(6)) : 0
+                        parseFloat(lpBalance) >= 0 && parseFloat(lpTotalSupply) > 0 && reserveA >= 0 ? `${parseFloat((parseFloat(lpBalance) / parseFloat(lpTotalSupply) * reserveA).toFixed(6))} (${parseFloat((parseFloat(lpBalance) / parseFloat(lpTotalSupply) * reserveA * value / 100.0).toFixed(6))})` : 0
                     }
                 </div>
             </Box>
@@ -156,7 +156,7 @@ const Pool = ({ lpPair, lpBalance, lpTotalSupply, reserveA, reserveB, rate, upda
                 </Box>
                 <div style={{ color: '#fff' }}>
                     {
-                        parseFloat(lpBalance) >= 0 && parseFloat(lpTotalSupply) > 0 && reserveB >= 0 ? parseFloat((parseFloat(lpBalance) / parseFloat(lpTotalSupply) * reserveB).toFixed(6)) : 0
+                        parseFloat(lpBalance) >= 0 && parseFloat(lpTotalSupply) > 0 && reserveB >= 0 ? `${parseFloat((parseFloat(lpBalance) / parseFloat(lpTotalSupply) * reserveB).toFixed(6))} (${parseFloat((parseFloat(lpBalance) / parseFloat(lpTotalSupply) * reserveB * value / 100.0).toFixed(6))})` : 0
                     }
                 </div>
             </Box>

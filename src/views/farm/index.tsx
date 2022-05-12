@@ -1,10 +1,11 @@
 import {
 	Box, Container, Stack, Divider, TextField, InputAdornment,
 	Typography, Table, TableBody, TableCell, TableContainer,
-	TableRow, TableHead, Collapse, Button, Grid, CircularProgress
+	TableRow, TableHead, Collapse, Button, Grid, CircularProgress,
+	Link
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { Search, Help } from '@mui/icons-material'
+import { Search, Help, Key } from '@mui/icons-material'
 import { fCurrency, fPercent } from 'utils/numbers'
 import useResponsive from 'hooks/useResponsive'
 import React, { useState, useEffect, useCallback } from "react"
@@ -14,7 +15,7 @@ import { providers } from 'ethers'
 import {
 	TOKEN_DATA,
 	getPoolDataFromPoint,
-	getPoolDataFromAddress,
+	searchPoolData,
 	getPairDataFromLpAddr,
 	TOKEN_TYPE,
 	getPendingMilky,
@@ -129,7 +130,6 @@ const FarmBox = ({ text, type, point, farmClicked }: FarmBoxProps) => {
 		<CustomFarmBox sx={{ backgroundColor }} onClick={() => click()}>
 			<Stack direction='row' alignItems='center' justifyContent='space-between'>
 				<CustomTypography>{text}</CustomTypography>
-				<a href='/swap' style={{ color: '#1a73e8', textDecoration: 'underline' }}>Add Liquidity</a>
 			</Stack>
 		</CustomFarmBox>
 	);
@@ -157,19 +157,18 @@ const Farm = () => {
 	}
 
 	const getSearchData = async () => {
-		setLoading(true)
-		setPoolData(await getPoolDataFromAddress(searchPattern))
-		setLoading(false)
+		if (searchPattern !== '') {
+			setLoading(true)
+			setPoolData(await searchPoolData(searchPattern))
+			setLoading(false)
+		} else {
+			getPoolsData()
+		}
 	}
 
 	useEffect(() => {
-		console.log('point', point)
 		getPoolsData()
 	}, [point])
-
-	useEffect(() => {
-		getSearchData()
-	}, [searchPattern])
 
 	const farmClicked = async (point: number) => {
 		setPoint(point)
@@ -202,6 +201,7 @@ const Farm = () => {
 						placeholder="Search by name, symbol, address"
 						value={searchPattern}
 						onChange={(e) => setSearchPattern(e.target.value)}
+						onKeyDown={(e) => e.key === 'Enter' && getSearchData()}
 						InputProps={{
 							endAdornment: (
 								<InputAdornment position="start">
@@ -323,7 +323,7 @@ function Row({ pool, index }: RowProps) {
 		if (appState.address !== '') {
 			handlePendingMilky(pool.pid, pool.address)
 		}
-	}, [appState.address])
+	}, [appState.address, open])
 
 	async function handleGetPoolData(lpAddr: string) {
 		// setDataFetching(true)
@@ -396,9 +396,13 @@ function Row({ pool, index }: RowProps) {
 						<Stack>
 							{
 								pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
-									<CustomTypography fontSize={16} fontWeight="700">Milky</CustomTypography>
+									<CustomTypography fontSize={16} fontWeight="700">{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
 								) : pool.tokenA && pool.tokenB && (
-									<CustomTypography fontSize={16} fontWeight="700">{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
+									<Link href={`/swap?tab=liquidity&pair1=${pool.tokenA}&pair2=${pool.tokenB}`}>
+										<CustomTypography fontSize={16} fontWeight="700">
+											{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}
+										</CustomTypography>
+									</Link>
 								)
 							}
 							<CustomTypography variant="body2" color="secondary" fontSize={12}>MilkySwap</CustomTypography>
@@ -459,13 +463,13 @@ function Row({ pool, index }: RowProps) {
 									<CustomTypography sx={{ color: '#fff' }}>
 										Stake / Unstake
 									</CustomTypography>
-									<CustomTypography paddingLeft={3}>
-										{
-											pool.tokenA && pool.tokenB && (
-												`${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label} / ${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}`
-											)
-										}
-									</CustomTypography>
+									{
+										pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
+											<CustomTypography paddingLeft={3}>{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
+										) : pool.tokenA && pool.tokenB && (
+											<CustomTypography paddingLeft={3}>{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
+										)
+									}
 								</Stack>
 								<Stack direction="row" alignItems="center">
 									{
@@ -482,8 +486,8 @@ function Row({ pool, index }: RowProps) {
 								{
 									pool.tokenA && pool.tokenB && (
 										<>
-											<CustomizedDialogs open={openStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.STAKE} pairType={`${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}`} handleOpen={handleStakeOpen} />
-											<CustomizedDialogs open={openUnStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.UNSTAKE} pairType={`${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}`} handleOpen={handleUnstakeOpen} />
+											<CustomizedDialogs open={openStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.STAKE} pairType={pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? `${TOKEN_DATA[TOKEN_TYPE.MILKY].label}` : `${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label} LP`} handleOpen={handleStakeOpen} />
+											<CustomizedDialogs open={openUnStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.UNSTAKE} pairType={pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? `${TOKEN_DATA[TOKEN_TYPE.MILKY].label}` : `${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label} LP`} handleOpen={handleUnstakeOpen} />
 										</>
 									)
 								}
