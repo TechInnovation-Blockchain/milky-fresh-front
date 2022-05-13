@@ -14,7 +14,7 @@ import Test from 'components/Test';
 
 export default function Router() {
   return useRoutes(
-    process.env.REACT_APP_PRODUCTION == "true" ? [
+    process.env.REACT_APP_RELEASE == "false" ? [
       {
         path: '/',
         element: <LandingLayout />,
