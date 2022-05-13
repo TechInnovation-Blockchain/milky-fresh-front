@@ -22,7 +22,8 @@ import {
 	unstakeTokensFromPool,
 	getCurrentPoolTVL,
 	getRewardsPerDay,
-	getCurrentPoolAPR
+	getCurrentPoolAPR,
+	getMilkyPair
 } from 'utils/integrate'
 
 import CustomizedDialogs from 'components/StakeDialog'
@@ -258,7 +259,10 @@ function Row({ pool, index }: RowProps) {
 	const [open, setOpen] = React.useState(false)
 	const [openStakeDlg, setOpenStakeDlg] = useState(false)
 	const [openUnStakeDlg, setOpenUnStakeDlg] = useState(false)
-	const [pendingMilky, setPendingMilky] = useState(0.0)
+	const [rewardsMilky, setRewardsMilky] = useState(0.0)
+	const [instant, setInstant] = useState(0.0)
+	const [locked, setLocked] = useState(0.0)
+	const [unLocked, setUnLocked] = useState(0.0)
 	const [tvl, setTVL] = useState(0.0)
 	const [apr, setAPR] = useState(0.0)
 	const [rewards, setRewards] = useState(0.0)
@@ -309,13 +313,17 @@ function Row({ pool, index }: RowProps) {
 	}
 
 	async function handlePendingMilky(pid: number, lpAddr: string) {
-		setPendingMilky(await getPendingMilky(pid, lpAddr))
+		const pendingMilky = await getPendingMilky(pid, lpAddr)
+		setRewardsMilky(pendingMilky.rewards)
+		setInstant(pendingMilky.instant)
+		setLocked(pendingMilky.locked)
+		setUnLocked(pendingMilky.unlocked)
 	}
 
 	async function handleHarvest() {
 		setLoading(true)
 		await unstakeTokensFromPool(index, pool.address, '0');
-		setPendingMilky(0.0)
+		setRewardsMilky(0.0)
 		setLoading(false)
 	}
 
@@ -445,17 +453,40 @@ function Row({ pool, index }: RowProps) {
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0, borderRadius: '14px' }} colSpan={6}>
 					<Collapse in={open} timeout="auto" unmountOnExit>
 						<Grid container justifyContent="space-between" paddingTop={2} paddingBottom={2}>
-							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>
+								<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={6}>
 								<Box>
 									<CustomTypography sx={{ color: '#fff' }}>
 										MILKY EARNED
 									</CustomTypography>
 								</Box>
 								<Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-									<CustomTypography sx={{ color: '#fff' }}>
-										{pendingMilky}
-									</CustomTypography>
-									<Button disabled={(pendingMilky > 0 && !loading) ? false : true} variant="contained" onClick={handleHarvest}>Harvest</Button>
+									<Stack flexDirection='column' width='100%'>
+										<Grid container padding={1}>
+											<Grid item xs={6}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													Rewards: {rewardsMilky}
+												</CustomTypography>
+											</Grid>
+											<Grid item xs={6}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													Instant: {instant}
+												</CustomTypography>
+											</Grid>
+										</Grid>
+										<Grid container padding={1}>
+											<Grid item xs={6}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													Locked: {locked}
+												</CustomTypography>
+											</Grid>
+											<Grid item xs={6}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													Unlocked: {unLocked}
+												</CustomTypography>
+											</Grid>
+										</Grid>
+									</Stack>
+									<Button disabled={(rewardsMilky > 0 && !loading) ? false : true} variant="contained" onClick={handleHarvest}>Harvest</Button>
 								</Box>
 							</Grid>
 							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>

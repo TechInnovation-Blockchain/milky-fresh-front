@@ -851,6 +851,18 @@ export async function addLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amoun
     }
 }
 
+export async function getMilkyPair(): Promise<void> {
+    console.log('address', MilkyFactory.address[getNetworkId()])
+
+    const contract = new ethers.Contract(
+        MilkyFactory.address[getNetworkId()],
+        MilkyFactory.abi,
+        JsonProvider
+    )
+
+    console.log('pairs:', await contract.allPairs(0))
+}
+
 export async function getTokenBalance(value: TOKEN_TYPE, address: string): Promise<number> {
     if (!CONTRACT_TABLE[value] || !CONTRACT_TABLE[value]) return 0
 
@@ -870,7 +882,14 @@ export async function getPendingMilky(pid: number, lpAddr: string) {
         getSigner()
     )
 
-    return formatDecimals(await contract.pendingMilky(pid, getAddress()), await getDecimalToken(lpAddr))
+    const pendingMilky = await contract.pendingMilky(pid, getAddress())
+    
+    return {
+        rewards: formatDecimals(pendingMilky[0], await getDecimalToken(lpAddr)),
+        instant: formatDecimals(pendingMilky[1], await getDecimalToken(lpAddr)),
+        locked: formatDecimals(pendingMilky[2], await getDecimalToken(lpAddr)),
+        unlocked: formatDecimals(pendingMilky[3], await getDecimalToken(lpAddr)),
+    }
 }
 
 export async function getRewardMilkyTokens(pid: number, address: string, amount: string | BigNumber) {
