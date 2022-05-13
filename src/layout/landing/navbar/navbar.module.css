@@ -34,6 +34,8 @@
   margin-top: -5px;
   list-style: none;
   padding: 5px 24px 0px 0px;
+  transition: all 0.5s ease;
+  margin-right: 15px;
 }
 
 .nav__menu ul li:hover {
@@ -47,7 +49,7 @@
   border-radius: 60px;
 }
 
-.nav__menu ul li:nth-child(2) {
+.nav__menu ul li:nth-child(3) {
   background: var(--btnColor);
   color: var(--whiteColor);
   font-weight: normal;
@@ -55,5 +57,5 @@
   padding: 7px 20px;
   border-radius: 60px;
   border: none;
-  margin-left: 10px;
+  margin-right: 0px;
 }

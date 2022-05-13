@@ -75,7 +75,6 @@ h4:after {
   text-align: center;
   color: var(--whiteColor);
   font-size: 16px;
-  font-weight: lighter;
   font-family: Open Sans;
 }
 
@@ -113,6 +112,10 @@ a {
   background: var(--btnPurple);
 }
 
+button {
+  transition: all 0.5s ease;
+}
+
 .grid {
   max-width: 100%;
   display: flex;
@@ -143,7 +146,7 @@ a {
   /* color: blueviolet; */
   color: #b31ab3;
   font-weight: normal;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .section2 {
@@ -156,6 +159,7 @@ a {
 
 .heading {
   text-align: center;
+  margin-top: 50px;
 }
 
 .heading h1 {
@@ -268,7 +272,7 @@ a {
   justify-content: space-around;
   align-items: center;
   position: relative;
-  /* padding: 50px; */
+  margin-top: 56px;
   padding: 10px;
   flex-wrap: wrap;
 }
@@ -307,7 +311,8 @@ a {
   justify-content: space-around;
   align-items: center;
   position: relative;
-  /* padding: 50px; */
+  margin-top: 56px;
+  margin-bottom: 50px;
   padding: 10px;
   flex-wrap: wrap;
 }

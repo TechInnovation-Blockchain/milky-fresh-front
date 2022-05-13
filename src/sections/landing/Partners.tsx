@@ -1,24 +1,24 @@
 import { FC } from "react";
 import { Item4Props } from "types/interface";
 import style from "views/home/home.module.css";
+import partner_wsg from "assets/images/partners/wsg_white.png";
 
 const Partners = () => {
   return (
     <section className={style.section4} style={{ marginTop: "1rem" }}>
       <div className={style.heading}>
-        <h1>Partners helping us</h1>
-        <h1>travel faster trough galaxy</h1>
+        <h1>Partners</h1>
       </div>
       <div className={style.grid4}>
-        <Item4 title="LOGO" desc="Partner name 1" />
-        <Item4 title="LOGO" desc="Partner name 2" />
-        <Item4 title="LOGO" desc="Partner name 3" />
+        <Item4 image={partner_wsg} desc="WSG" />
+        <Item4 image={partner_wsg} desc="SF" />
+        <Item4 image={partner_wsg} desc="UNO" />
       </div>
     </section>
   );
 };
 
-const Item4: FC<Item4Props> = ({ title, desc }: Item4Props) => (
+const Item4: FC<Item4Props> = ({ image, desc }: Item4Props) => (
   <div>
     <div
       className={style.grid4__item}
@@ -26,7 +26,6 @@ const Item4: FC<Item4Props> = ({ title, desc }: Item4Props) => (
     >
       <div
         style={{
-          border: "5px solid rgb(179, 26, 179)",
           height: "100px",
           width: "100px",
           borderRadius: "50%",
@@ -37,9 +36,9 @@ const Item4: FC<Item4Props> = ({ title, desc }: Item4Props) => (
           color: "#fff",
         }}
       >
-        <h2>{title}</h2>
+        <img src={image}/>
       </div>
-      <p style={{fontWeight: 'bold'}}>{desc}</p>
+      <p style={{ fontWeight: 'bold', fontSize: '21px', marginTop: '17px' }}>{desc}</p>
     </div>
   </div>
 );
