@@ -8,7 +8,7 @@ import {
 const Test = () => {
 	return (
         <Stack flexDirection='row' alignItems='center' justifyContent='center'>
-            <Typography sx={{ paddingTop: '40px', fontSize: '40px', color: '#fff', fontWeight: 'bold' }}>COMING SOON</Typography>
+            <Typography sx={{ paddingTop: '40px', fontSize: '40px', color: '#fff', fontWeight: 'bold' }}>COMING SOON {process.env.REACT_APP_PRODUCTION}</Typography>
         </Stack>
     )
 }
