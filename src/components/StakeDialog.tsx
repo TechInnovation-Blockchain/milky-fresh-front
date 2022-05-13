@@ -10,7 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import { Stack, Input } from '@mui/material';
 import { useEffect } from 'react';
-import { getLPBalance, stakeTokensToPool, getPoolBalance, unstakeTokensFromPool } from 'utils/integrate'
+import { getLPBalance, stakeTokensToPool, getPoolBalance, unstakeTokensFromPool, getCurrentBalanceToUSD } from 'utils/integrate'
 import { useOnboard } from 'use-onboard'
 import { TypeDialog } from 'config/constants/types'
 import { BigNumber } from 'ethers';
@@ -85,6 +85,7 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
     const [balance, setBalance] = React.useState(0)
     const [loading, setLoading] = React.useState(false)
     const { onboard } = useOnboard()
+    const [balanceUSD, setBalanceUSD] = React.useState(0.0)
 
     let address = onboard ? onboard.getState().address : ''
 
@@ -96,6 +97,8 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
 
     async function handlePoolBalance(lpAddr: string) {
         const lpBalance = await getPoolBalance(lpAddr)
+        const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, lpAddr)
+        setBalanceUSD(usd)
         setRealBalance(lpBalance.realBalance)
         setBalance(lpBalance.balance)
     }
@@ -157,19 +160,25 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
                         open={opendlg}
                     >
                         <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
-                            {type} LP tokens
+                            {type}
                         </BootstrapDialogTitle>
                         <DialogContent>
                             <Stack padding={2} sx={{ borderRadius: '10px', backgroundColor: '#eeeaf4', color: '#2b0e79' }} >
                                 <Stack direction="row" alignItems='center' justifyContent='space-between'>
                                     <Typography fontWeight='bolder'>{type}</Typography>
-                                    <Typography fontWeight='bolder'>Balance: {balance}</Typography>
+                                    {
+                                        type === 'UnStake' ? (
+                                            <Typography fontWeight='bolder'>Balance: {balance} (${balanceUSD.toFixed(2)})</Typography>
+                                        ) : (
+                                            <Typography fontWeight='bolder'>Balance: {balance}</Typography>
+                                        )
+                                    }
                                 </Stack>
                                 <Stack direction="row" alignItems='center' justifyContent='space-between'>
                                     <InputStyle type='text' value={amount} onChange={handleValueChange}></InputStyle>
                                     <Stack direction="row" alignItems='end'>
                                         <Button variant="contained" sx={{ marginRight: '8px' }} onClick={() => handleMaxClicked()}>MAX</Button>
-                                        <Typography fontWeight='bolder'>{pairType} LP</Typography>
+                                        <Typography fontWeight='bolder'>{pairType}</Typography>
                                     </Stack>
                                 </Stack>
                             </Stack>

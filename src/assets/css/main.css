@@ -79,7 +79,7 @@ select {
 /* over custom css for body */
 
 html {
-  background: url(../images/bg.png) no-repeat;
+  background: url(../images/bg.jpeg) no-repeat;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;

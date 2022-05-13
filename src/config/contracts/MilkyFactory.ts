@@ -2,7 +2,7 @@ import { NetworkId, ContractAddress, ContractInformation } from 'config/constant
 
 const MilkyFactory: ContractInformation = {
     address: {
-        [NetworkId.BscTestnet]: '0x15593456D271639B31f1D316a195400394FDB968',
+        [NetworkId.BscTestnet]: '0xe059dd40b54E1bB4c43C554c71F6B94BB6Bf56d4',
     } as ContractAddress,
     abi: [
         {

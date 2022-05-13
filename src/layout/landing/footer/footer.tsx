@@ -47,10 +47,10 @@ const Footer = () => {
             color: "#fff",
           }}
         >
-          <img src={logo} alt="logo" style={{ marginBottom: '1rem' }} />
+          <img src={logo} alt="logo" style={{marginBottom: '1rem'}} />
 
           <p>
-            <small style={{ fontWeight: 'lighter', fontSize: '12px' }}>
+            <small style={{fontWeight: 'lighter', fontSize: '12px'}}>
               Lorem ipsum dolor si repudiandae molestiae khjdfhueafjsdalk
               quaeratiis illo omnis, nisi laborum!
             </small>
@@ -62,26 +62,25 @@ const Footer = () => {
               mt: 2,
             }}
           >
-            <a target="_blank" href="https://twitter.com/MilkyWayDefi"><img
+            <img
               src="/icons/tw.svg"
               alt="tw"
               style={{ marginRight: "0.5rem" }}
               className={style.btn}
-            /></a>
-            <a target="_blank" href="https://t.me/MilkyWayDefi"><img
+            />
+            <img
               src="/icons/tg.svg"
               alt="tg"
               style={{ marginRight: "0.5rem" }}
               className={style.btn}
-            /></a>
-            <a target="_blank" href="https://docs.milkyway.exchange">
-              <img src="/icons/m.svg" alt="m" className={style.btn} /> </a>
+            />
+            <img src="/icons/m.svg" alt="m" className={style.btn} />
           </Box>
         </Item>
 
         <FooterItem title="PRODUCTS" data={items1} />
         <FooterItem title="SUPPORT" data={items2} />
-        <FooterItem title="RESOURCES" data={items3} />
+        <FooterItem title="SUPPORT" data={items3} />
       </Box>
     </div>
   );
@@ -89,46 +88,54 @@ const Footer = () => {
 
 const items1 = [
   {
-    title: "Exchange",
-    url: "/swap",
+    title: "MilkyWay exchange AMM",
+    url: "",
   },
   {
-    title: "Farms",
-    url: "/farm",
+    title: "WSG gaming",
+    url: "",
   },
   {
-    title: "Wall Street Games",
-    url: "https://wsg.gg",
-  }
+    title: "Third stuff",
+    url: "",
+  },
+  {
+    title: "API",
+    url: "",
+  },
 ];
 
 const items2 = [
   {
     title: "Tutorials",
-    url: "https://docs.milkyway.exchange/tutorials",
+    url: "",
   },
   {
     title: "Documentation",
-    url: "https://docs.milkyway.exchange",
+    url: "",
   },
   {
-    title: "Chat",
-    url: "https://t.me/MilkyWayDefi",
+    title: "Discord",
+    url: "",
+  },
+  {
+    title: "Forum",
+    url: "",
   },
 ];
 
 const items3 = [
   {
-    title: "Get started",
-    url: "https://academy.binance.com/en/articles/connecting-metamask-to-binance-smart-chain",
+    title: "Protocol",
+    url: "",
   },
   {
-    title: "Token",
-    url: "https://bscscan.com/token/",
+    title: "Create a Pair",
+    url: "",
   },
   {
-    title: "Register for WSG",
-    url: "https://wsg.gg",
+    title: "Register for WSG Gaming",
+    url: "",
   },
 ];
 

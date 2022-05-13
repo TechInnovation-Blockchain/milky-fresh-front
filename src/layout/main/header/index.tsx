@@ -86,14 +86,13 @@ const Header = () => {
 		if (web3Modal.cachedProvider) {
 			connect()
 		}
-	}, [connect])
+	}, [])
 
 	useEffect(() => {
 		if (appState.provider?.on) {
 			const handleAccountsChanged = (accounts: string[]) => {
 				// eslint-disable-next-line no-console
-				console.log('accountsChanged', accounts)
-
+				setAppState({ ...appState, address: accounts[0] })
 			}
 
 			const handleDisconnect = (error: { code: number; message: string }) => {
@@ -117,7 +116,7 @@ const Header = () => {
 		} else {
 			setupProvider(null)
 		}
-	}, [appState.provider, disconnect])
+	}, [appState.provider])
 
 	const handleMenuItemClick = (
 		event: React.MouseEvent<HTMLLIElement, MouseEvent>,

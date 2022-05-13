@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from "react-router-dom";
 import {
 	Box, ToggleButton, ToggleButtonGroup, IconButton, Button, Typography,
 	Popper, ClickAwayListener, Paper, Grow, MenuItem, MenuList, Stack
@@ -89,6 +90,11 @@ enum OPTION_TYPE {
 
 const Swap = () => {
 	const [appState, setAppState] = useAppContext()
+	const [searchParams] = useSearchParams()
+
+	const tab = searchParams.get('tab') != null ? (searchParams.get('tab') as OPTION_TYPE) : OPTION_TYPE.SWAP
+	const pair1 = searchParams.get('pair1') != null ? (searchParams.get('pair1') as TOKEN_TYPE) : 'default'
+	const pair2 = searchParams.get('pair2') ? (searchParams.get('pair2') as TOKEN_TYPE) : 'default'
 
 	const connect = useCallback(async function () {
 		// This is the initial `provider` that is returned when
@@ -104,14 +110,14 @@ const Swap = () => {
 		const address = await signer.getAddress()
 		const network = await web3Provider.getNetwork()
 
-		setAppState({...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+		setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
 	}, [])
 
 	useEffect(() => {
 		if (web3Modal.cachedProvider) {
 			connect()
 		}
-	}, [connect])
+	}, [])
 
 	// useEffect(() => {
 	// 	if (appState.address !== '') {
@@ -127,40 +133,42 @@ const Swap = () => {
 	const [waiting, setWaiting] = useState(false);
 	const anchorRef = useRef<HTMLButtonElement>(null)
 	const [selectedIndex, setSelectedIndex] = useState(0)
-	const [optionValue, setOptionValue] = useState<OPTION_TYPE>(OPTION_TYPE.SWAP)
+	const [optionValue, setOptionValue] = useState<OPTION_TYPE>(tab)
 	// const [connected, setConnected] = useState(false)
-	const [pairValue, setPairValue] = useState<string | null>('default')
-	const [secondPairValue, setSecondPairValue] = useState<string | null>('default')
-	const [amountTokenA, setAmountTokenA] = useState<string>('0.0')
-	const [amountTokenB, setAmountTokenB] = useState<string>('0.0')
-	const [balance, setBalance] = useState('0.0')
-	const [balanceA, setBalanceA] = useState<number>(0.0)
-	const [balanceB, setBalanceB] = useState<number>(0.0)
-	const [rate, setRate] = useState<number>(0.0)
+	const [pairValue, setPairValue] = useState<string | null>(pair1)
+	const [secondPairValue, setSecondPairValue] = useState<string | null>(pair2)
+	const [amountTokenA, setAmountTokenA] = useState<string>('0')
+	const [amountTokenB, setAmountTokenB] = useState<string>('0')
+	const [balance, setBalance] = useState('0')
+	const [balanceA, setBalanceA] = useState<number>(0)
+	const [balanceB, setBalanceB] = useState<number>(0)
+	const [rate, setRate] = useState<number>(0)
 	const [lp, setLP] = useState<string | null>('default')
 	const [lpRealBalance, setLpRealBalance] = useState<BigNumber>(BigNumber.from(0))
-	const [lpBalance, setLpBalance] = useState<string>('0.0')
-	const [lpTotalSupply, setLpTotalSupply] = useState<string>('0.0')
+	const [lpBalance, setLpBalance] = useState<string>('0')
+	const [lpTotalSupply, setLpTotalSupply] = useState<string>('0')
 	const [lpPair, setLpPair] = useState<any>(null)
-	const [reserveA, setReserveA] = useState<number>(0.0)
-	const [reserveB, setReserveB] = useState<number>(0.0)
-	const [pro, setPro] = useState<number>(0.0)
+	const [reserveA, setReserveA] = useState<number>(0)
+	const [reserveB, setReserveB] = useState<number>(0)
+	const [pro, setPro] = useState<number>(0)
 	const [pairs, setPairs] = useState<any[]>([])
 	const [arrow, setArrow] = useState<boolean>(false)
 	const [openSetting, setOpenSetting] = useState<boolean>(false)
-	const [slippage, setSlippage] = useState<number>(0.1)
-	const [deadline, setDeadline] = useState<number>(20)
+	const [slippage, setSlippage] = useState<string>(localStorage.getItem('slippage') || '0.1')
+	const [deadline, setDeadline] = useState<string>(localStorage.getItem('deadline') || '20')
 
 	const handleOpenSetting = (state: boolean): void => {
 		setOpenSetting(state)
 	}
 
 	const handleSlippage = (value: number): void => {
-		setSlippage(value)
+		localStorage.setItem('slippage', JSON.stringify(value))
+		setSlippage(value.toString())
 	}
 
 	const handleDeadline = (value: number): void => {
-		setDeadline(value)
+		localStorage.setItem('deadline', JSON.stringify(value))
+		setDeadline(value.toString())
 	}
 
 	function handleOptionClick(val: OPTION_TYPE) {
@@ -176,18 +184,29 @@ const Swap = () => {
 		setAmountTokenB('0.0')
 		setBalanceA(0.0)
 		setBalanceB(0.0)
-		setPairValue('default')
-		setSecondPairValue('default')
+		setPairValue(pair1)
+		setSecondPairValue(pair2)
 	}, [optionValue])
 
 	useEffect(() => {
 		if (waiting) return;
 		setAmountTokenA('0.0')
 		setAmountTokenB('0.0')
-		setBalanceA(0.0)
-		setBalanceB(0.0)
-		setPairValue('default')
-		setSecondPairValue('default')
+		if (pairValue === TOKEN_TYPE.BNB) {
+			getUserBalance()
+		}
+		else
+			handleFirstTokenBalance(pairValue as TOKEN_TYPE)
+
+		if (secondPairValue === TOKEN_TYPE.BNB) {
+			getUserBalance()
+		}
+		else
+			handleSecondTokenBalance(secondPairValue as TOKEN_TYPE)
+		// setBalanceA(0.0)
+		// setBalanceB(0.0)
+		// setPairValue(pair1)
+		// setSecondPairValue(pair2)
 		if (appState.address !== '') {
 			getPairs()
 			getLiquidityData()
@@ -201,7 +220,10 @@ const Swap = () => {
 	async function getUserBalance() {
 		setBalance(await getBalance())
 	}
-	getUserBalance()
+
+	useEffect(() => {
+		getUserBalance()
+	}, [appState.address])
 
 	const updateAmountTokenA = (amount: string): void => {
 		setAmountTokenA(amount);
@@ -301,7 +323,7 @@ const Swap = () => {
 	const handleLiquidity = async () => {
 		if (appState.address !== '') {
 			setWaiting(true);
-			await addLiquidity(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, deadline);
+			await addLiquidity(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, parseFloat(deadline));
 			setWaiting(false);
 		}
 	}
@@ -310,14 +332,14 @@ const Swap = () => {
 		if (appState.address === '' || pro === 0) return;
 		setWaiting(true);
 		const pair: any = lp?.split('/');
-		await removeLiquidity(pair[0], pair[1], lpRealBalance.div(BigNumber.from(pro.toString())), appState.address as string, deadline)
+		await removeLiquidity(pair[0], pair[1], lpRealBalance.div(BigNumber.from(pro.toString())), appState.address as string, parseFloat(deadline))
 		setWaiting(false);
 	}
 
 	const handleSwap = async () => {
-		if (appState.address !== '' && pairValue !== 'default' && pairValue !== 'default' ) {
+		if (appState.address !== '' && pairValue !== 'default' && pairValue !== 'default') {
 			setWaiting(true)
-			await swapTokensToEth(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, slippage, deadline)
+			await swapTokensToEth(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, parseFloat(slippage), parseFloat(deadline))
 			setWaiting(false)
 		}
 	}
@@ -393,25 +415,25 @@ const Swap = () => {
 
 	useEffect(() => {
 		if (pairValue === 'default' || appState.address == null) return;
-		if (pairValue === TOKEN_TYPE.BNB){
+		if (pairValue === TOKEN_TYPE.BNB) {
 			setBalanceA(formatDecimals(balance, 18))
 		}
 		else
 			handleFirstTokenBalance(pairValue as TOKEN_TYPE)
-	}, [pairValue])
+	}, [pairValue, balance])
 
 	useEffect(() => {
 		if (secondPairValue === 'default' || appState.address === '') return;
-		if (secondPairValue === TOKEN_TYPE.BNB){
+		if (secondPairValue === TOKEN_TYPE.BNB) {
 			setBalanceB(formatDecimals(balance, 18))
 		}
 		else
 			handleSecondTokenBalance(secondPairValue as TOKEN_TYPE)
-	}, [secondPairValue])
+	}, [secondPairValue, balance])
 
 	useEffect(() => {
 		handlePairRate(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE);
-	}, [pairValue, secondPairValue])
+	}, [pairValue, secondPairValue, balance])
 
 	useEffect(() => {
 		getLiquidityData()
@@ -483,9 +505,8 @@ const Swap = () => {
 										<ArrowStyleDown onClick={() => setArrow(!arrow)}><ArrowForwardIos /></ArrowStyleDown>
 										<SwapForm label={arrow ? "Swap from" : "Swap to"} pairValue={secondPairValue} balance={balanceB} amount={amountTokenB} updatePairValue={updateSecondPairValue} updateAmount={updateAmountTokenB} />
 									</Stack>
-									<Stack direction='row' alignItems='center' paddingX={3} paddingTop={1} sx={{color: 'white'}}>
-										<Typography sx={{paddingRight: '16px'}}>Slippage Tolerance</Typography>
-										<Typography>{ slippage }%</Typography>
+									<Stack direction='row' alignItems='center' paddingX={3} paddingTop={2} sx={{ color: 'white' }}>
+										<Typography sx={{ paddingRight: '16px' }}>Slippage Tolerance : {slippage}%</Typography>
 									</Stack>
 								</Stack>
 								{
@@ -573,7 +594,7 @@ const Swap = () => {
 			</Popper>
 			{
 				openSetting && (
-					<SettingDialog open={true} slippage={slippage} deadline={deadline} handleOpen={handleOpenSetting} handleSlippage={handleSlippage} handleDeadline={handleDeadline}></SettingDialog>
+					<SettingDialog open={true} slippage={parseFloat(slippage)} deadline={parseFloat(deadline)} handleOpen={handleOpenSetting} handleSlippage={handleSlippage} handleDeadline={handleDeadline}></SettingDialog>
 				)
 			}
 		</Box>

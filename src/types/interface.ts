@@ -14,6 +14,6 @@ export interface Item3Props {
   desc: string;
 }
 export interface Item4Props {
-  image: string;
+  title: string;
   desc: string;
 }

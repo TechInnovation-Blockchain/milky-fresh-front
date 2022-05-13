@@ -39,7 +39,7 @@ const Price = () => {
 
 const Item: FC<ItemProps> = ({ amount, desc }: ItemProps) => (
   <div className={style.item}>
-    <h3 style={{ fontSize: "36px", fontWeight: 'bold' }}>{amount}</h3>
+    <h3 style={{ fontSize: "44px", fontWeight: 'bold' }}>{amount}</h3>
     <span>{desc}</span>
   </div>
 );
