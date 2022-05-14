@@ -24,6 +24,7 @@ const Exchange = () => {
             position: "absolute",
             top: "26rem",
             left: "-7.5rem",
+            border: "unset"
           }}
         >
           <img src={smallLogo} alt="smallLogo" />

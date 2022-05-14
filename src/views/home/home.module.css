@@ -1,11 +1,8 @@
 :root {
   --whiteColor: white;
-  --btnColor: linear-gradient(
-    101deg,
-    rgba(195, 179, 34, 1) 0%,
-    rgba(253, 61, 45, 0.9560866582961309) 100%
-  );
+  --btnColor: linear-gradient(101deg, rgba(195, 179, 34, 1) 0%, rgba(253, 61, 45, 0.9560866582961309) 100%);
   --btnPurple: #421c52;
+  --btnColor2: linear-gradient(101deg, rgb(223, 105, 225) 0%, rgb(140, 1, 183) 100%);
 }
 
 .wrapper {
@@ -136,7 +133,8 @@ button {
   margin-left: 24px;
   align-items: center;
   border-radius: 50%;
-  background-image: linear-gradient(to bottom, #360C47, #261F4B);
+  background-image: linear-gradient(to bottom, #360c47, #261f4b);
+  border: #8a25a3 2px solid;
 }
 
 .item h3 {
@@ -207,8 +205,9 @@ button {
   margin: 10px;
   align-items: center;
   border-radius: 50%;
-  background-image: linear-gradient(to bottom, #360C47, #1C1946);
+  background-image: linear-gradient(to bottom, #360c47, #1c1946);
   position: relative;
+  border: #8a25a3 2px solid;
 }
 
 @media screen and (max-width: 750px) {
@@ -295,8 +294,9 @@ button {
   margin-left: 20px;
   align-items: center;
   border-radius: 50%;
-  background-image: linear-gradient(to bottom, #360C47, #1C1946);
+  background-image: linear-gradient(to bottom, #360c47, #1c1946);
   position: relative;
+  border: #8a25a3 2px solid;
 }
 
 .grid3__item span {

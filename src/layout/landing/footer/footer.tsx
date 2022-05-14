@@ -171,7 +171,7 @@ const FooterItem: FC<FooterItemProps> = ({ title, data }: FooterItemProps) => (
             fontWeight: "normal",
           }}
         >
-          {item.title}
+          <a href={item.url}>{item.title}</a>
         </Item>
       ))}
     </Box>

@@ -27,7 +27,7 @@ const ToggleButtonStyle = styled(ToggleButton)(() => ({
 	textTransform: 'capitalize',
 	'&.Mui-selected': {
 		color: '#fff',
-		backgroundColor: '#DD38F2 !important',
+		background: 'var(--btnColor2) !important',
 	},
 	'& + &': {
 		marginLeft: '10px !important',
