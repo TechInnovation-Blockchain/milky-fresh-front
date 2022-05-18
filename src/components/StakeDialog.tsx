@@ -10,7 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import { Stack, Input } from '@mui/material';
 import { useEffect } from 'react';
-import { getLPBalance, stakeTokensToPool, getPoolBalance, unstakeTokensFromPool, getCurrentBalanceToUSD } from 'utils/integrate'
+import { getLPBalance, stakeTokensToPool, getPoolBalance, unstakeTokensFromPool, getCurrentBalanceToUSD, getStakedBalance } from 'utils/integrate'
 import { useOnboard } from 'use-onboard'
 import { TypeDialog } from 'config/constants/types'
 import { BigNumber } from 'ethers';
@@ -84,10 +84,7 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
     const [realBalance, setRealBalance] = React.useState(BigNumber.from(0))
     const [balance, setBalance] = React.useState(0)
     const [loading, setLoading] = React.useState(false)
-    const { onboard } = useOnboard()
     const [balanceUSD, setBalanceUSD] = React.useState(0.0)
-
-    let address = onboard ? onboard.getState().address : ''
 
     async function handleLpBalance(lpAddr: string) {
         const lpBalance = await getLPBalance(lpAddr)
@@ -103,13 +100,22 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
         setBalance(lpBalance.balance)
     }
 
+    async function handleStakedBalance() {
+        const lpBalance = await getStakedBalance(pid)
+        const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, lpAddr)
+        setBalanceUSD(usd)
+        setRealBalance(lpBalance.realBalance)
+        setBalance(lpBalance.balance)
+    }
+
     useEffect(() => {
         setOpenDlg(open);
         if (open) {
-            if(type === TypeDialog.STAKE) {
+            if (type === TypeDialog.STAKE) {
                 handleLpBalance(lpAddr)
-            } else if(type === TypeDialog.UNSTAKE) {
-                handlePoolBalance(lpAddr)
+            } else if (type === TypeDialog.UNSTAKE) {
+                handleStakedBalance()
+                // handlePoolBalance(lpAddr)
             }
         }
     }, [open])
@@ -123,7 +129,7 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
         setAmount(event.target.value)
     };
 
-    const handleClickConfirm = async() => {
+    const handleClickConfirm = async () => {
         setLoading(true)
         if (type === TypeDialog.STAKE) {
             await stakeTokensToPool(pid, amount, lpAddr, balance)
@@ -138,13 +144,14 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
     }
 
     useEffect(() => {
-        if(loading)return;
-        setAmount('0')
-        if(type === TypeDialog.STAKE) {
+        if (loading) return;
+        setAmount('0.0')
+        if (type === TypeDialog.STAKE) {
             handleLpBalance(lpAddr)
-        } else if(type === TypeDialog.UNSTAKE) {
-            handlePoolBalance(lpAddr)
-        }
+        } 
+        // else if (type === TypeDialog.UNSTAKE) {
+        //     handlePoolBalance(lpAddr)
+        // }
     }, [loading])
 
     return (

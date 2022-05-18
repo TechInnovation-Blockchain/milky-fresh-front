@@ -13,6 +13,8 @@ import { providers } from 'ethers'
 import { useAppContext } from 'context/WalletContext'
 import { setupProvider } from 'utils/integrate'
 import { ethers } from 'ethers'
+import { NetworkId } from 'config/constants/types'
+import toast from "react-hot-toast"
 
 const LinkStyle = styled(Link)(() => ({
 	color: 'white',
@@ -104,7 +106,13 @@ const Header = () => {
 			provider.on('accountsChanged', handleAccountsChanged)
 			provider.on('disconnect', handleDisconnect)
 
-			setupProvider(appState)
+			if(appState.web3Provider && appState.web3Provider.network) {
+				if(appState.web3Provider.network.chainId !== NetworkId.BscTestnet) {
+					toast.error("You should select the right network.")
+				} else {
+					setupProvider(appState)
+				}
+			}
 
 			// Subscription Cleanup
 			return () => {

@@ -253,7 +253,7 @@ export default function UnstyledSelectRichOptions({ currency, updateCurrency }: 
 
 const cryptos = [
   { value: TOKEN_TYPE.BNB, label: 'BNB', image: bnbLogo },
-  { value: TOKEN_TYPE.MILKY, label: 'Milky', image: milkyLogo },
+  { value: TOKEN_TYPE.MILKY, label: 'MILKY', image: milkyLogo },
   { value: TOKEN_TYPE.BUSD, label: 'BUSD', image: busdLogo },
   { value: TOKEN_TYPE.WSG, label: 'WSG', image: wsgLogo },
   { value: TOKEN_TYPE.USDT, label: 'USDT', image: usdtLogo },

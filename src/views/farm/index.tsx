@@ -8,7 +8,7 @@ import { styled } from '@mui/material/styles'
 import { Search, Help, Key } from '@mui/icons-material'
 import { fCurrency, fPercent } from 'utils/numbers'
 import useResponsive from 'hooks/useResponsive'
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import { web3Modal } from 'utils/web3Modal'
 import { providers } from 'ethers'
 
@@ -23,7 +23,9 @@ import {
 	getCurrentPoolTVL,
 	getRewardsPerDay,
 	getCurrentPoolAPR,
-	getMilkyPair
+	getMilkyPair,
+	getStakedBalance,
+	getCurrentBalanceToUSD
 } from 'utils/integrate'
 
 import CustomizedDialogs from 'components/StakeDialog'
@@ -260,13 +262,13 @@ function Row({ pool, index }: RowProps) {
 	const [openStakeDlg, setOpenStakeDlg] = useState(false)
 	const [openUnStakeDlg, setOpenUnStakeDlg] = useState(false)
 	const [rewardsMilky, setRewardsMilky] = useState(0.0)
-	const [instant, setInstant] = useState(0.0)
-	const [locked, setLocked] = useState(0.0)
-	const [unLocked, setUnLocked] = useState(0.0)
+	const [totalRewards, setTotalRewards] = useState(0.0)
 	const [tvl, setTVL] = useState(0.0)
 	const [apr, setAPR] = useState(0.0)
 	const [rewards, setRewards] = useState(0.0)
 	const [loading, setLoading] = useState(false)
+	const [stakedUSD, setStakedUSD] = useState(0.0)
+	const [stakedAmount, setStakedAmount] = useState(0.0)
 
 	const connect = useCallback(async function () {
 		// This is the initial `provider` that is returned when
@@ -312,12 +314,17 @@ function Row({ pool, index }: RowProps) {
 		}
 	}
 
+	async function handleStakedBalance() {
+		const lpBalance = await getStakedBalance(pool.pid)
+		const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, pool.address)
+		setStakedUSD(usd)
+		setStakedAmount(lpBalance.balance)
+	}
+
 	async function handlePendingMilky(pid: number, lpAddr: string) {
 		const pendingMilky = await getPendingMilky(pid, lpAddr)
 		setRewardsMilky(pendingMilky.rewards)
-		setInstant(pendingMilky.instant)
-		setLocked(pendingMilky.locked)
-		setUnLocked(pendingMilky.unlocked)
+		setTotalRewards(pendingMilky.instant + pendingMilky.locked * 3 / 4)
 	}
 
 	async function handleHarvest() {
@@ -327,12 +334,6 @@ function Row({ pool, index }: RowProps) {
 		setLoading(false)
 	}
 
-	useEffect(() => {
-		if (appState.address !== '') {
-			handlePendingMilky(pool.pid, pool.address)
-		}
-	}, [appState.address, open])
-
 	async function handleGetPoolData(lpAddr: string) {
 		// setDataFetching(true)
 		setTVL(await getCurrentPoolTVL(pool.pid))
@@ -341,11 +342,45 @@ function Row({ pool, index }: RowProps) {
 		// setDataFetching(false)
 	}
 
+	function useInterval(callback: any, delay: any) {
+		const savedCallback: any = useRef();
+
+		// Remember the latest function.
+		useEffect(() => {
+			savedCallback.current = callback;
+		}, [callback]);
+
+		// Set up the interval.
+		useEffect(() => {
+			function tick() {
+				savedCallback.current();
+			}
+			if (delay !== null) {
+				let id = setInterval(tick, delay);
+				return () => clearInterval(id);
+			}
+		}, [delay]);
+	}
+
 	useEffect(() => {
 		if (pool.address) {
 			handleGetPoolData(pool.address)
+			if (appState.address !== '') {
+				handlePendingMilky(pool.pid, pool.address)
+				handleStakedBalance()
+			}
 		}
-	})
+	}, [])
+
+	useInterval(() => {
+		if (pool.address) {
+			handleGetPoolData(pool.address)
+			if (appState.address !== '') {
+				handlePendingMilky(pool.pid, pool.address)
+				handleStakedBalance()
+			}
+		}
+	}, 60000);
 
 	const handleStakeOpen = (state: boolean): void => {
 		setOpenStakeDlg(state)
@@ -369,7 +404,6 @@ function Row({ pool, index }: RowProps) {
 				}}
 			>
 				<TableCell component="th" scope="row" sx={{ borderTopLeftRadius: '14px', borderBottomLeftRadius: '14px' }}>
-
 					<Stack direction="row" alignItems='center' spacing={3}>
 						<Box>
 							{
@@ -453,7 +487,7 @@ function Row({ pool, index }: RowProps) {
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0, borderRadius: '14px' }} colSpan={6}>
 					<Collapse in={open} timeout="auto" unmountOnExit>
 						<Grid container justifyContent="space-between" paddingTop={2} paddingBottom={2}>
-								<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={6}>
+							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={6}>
 								<Box>
 									<CustomTypography sx={{ color: '#fff' }}>
 										MILKY EARNED
@@ -464,24 +498,7 @@ function Row({ pool, index }: RowProps) {
 										<Grid container padding={1}>
 											<Grid item xs={6}>
 												<CustomTypography sx={{ color: '#fff' }}>
-													Rewards: {rewardsMilky}
-												</CustomTypography>
-											</Grid>
-											<Grid item xs={6}>
-												<CustomTypography sx={{ color: '#fff' }}>
-													Instant: {instant}
-												</CustomTypography>
-											</Grid>
-										</Grid>
-										<Grid container padding={1}>
-											<Grid item xs={6}>
-												<CustomTypography sx={{ color: '#fff' }}>
-													Locked: {locked}
-												</CustomTypography>
-											</Grid>
-											<Grid item xs={6}>
-												<CustomTypography sx={{ color: '#fff' }}>
-													Unlocked: {unLocked}
+													Rewards: {totalRewards}
 												</CustomTypography>
 											</Grid>
 										</Grid>
@@ -492,7 +509,7 @@ function Row({ pool, index }: RowProps) {
 							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>
 								<Stack direction="row" alignItems="center">
 									<CustomTypography sx={{ color: '#fff' }}>
-										Stake / Unstake
+										Staked {stakedAmount} (${stakedUSD.toFixed(2)})
 									</CustomTypography>
 									{
 										pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (

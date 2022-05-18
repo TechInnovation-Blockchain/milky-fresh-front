@@ -12,7 +12,7 @@ import { ArrowForwardIos, Dehaze } from '@mui/icons-material';
 import SwapForm from 'components/Form';
 import useResponsive from 'hooks/useResponsive';
 import { useAppContext } from 'context/WalletContext';
-import { getBalance, addLiquidity, TOKEN_TYPE, TOKEN_PAIR, getTokenBalance, getRateFromPair, formatDecimals, swapTokensToEth, getLpData, removeLiquidity, getPairData } from 'utils/integrate';
+import { getBalance, addLiquidity, TOKEN_TYPE, TOKEN_PAIR, getTokenBalance, getRateFromPair, formatDecimals, swapTokensToEth, getLpData, removeLiquidity, getPairData, TOKEN_DATA, getMilkyPair } from 'utils/integrate';
 import { BigNumber } from 'ethers';
 import SettingDialog from "components/SettingDialog"
 import { web3Modal } from 'utils/web3Modal'
@@ -186,6 +186,10 @@ const Swap = () => {
 		setBalanceB(0.0)
 		setPairValue(pair1)
 		setSecondPairValue(pair2)
+		if (appState.address !== '') {
+			getPairs()
+			getLiquidityData()
+		}
 	}, [optionValue])
 
 	useEffect(() => {
@@ -225,6 +229,13 @@ const Swap = () => {
 		getUserBalance()
 	}, [appState.address])
 
+	useEffect(() => {
+		if (appState.address !== '') {
+			getPairs()
+			getLiquidityData()
+		}
+	}, [])
+
 	const updateAmountTokenA = (amount: string): void => {
 		setAmountTokenA(amount);
 		if (amount === '') {
@@ -247,68 +258,68 @@ const Swap = () => {
 
 	const updatePairValue = (pair: string | null): void => {
 		setPairValue(pair);
-		switch (pair) {
-			case 'default': {
-				setSecondPairValue('default')
-				break;
-			}
-			case TOKEN_TYPE.BNB: {
-				setSecondPairValue(TOKEN_TYPE.MILKY)
-				break;
-			}
-			case TOKEN_TYPE.MILKY: {
-				setSecondPairValue(TOKEN_TYPE.BNB);
-				break;
-			}
-			case TOKEN_TYPE.BUSD: {
-				setSecondPairValue(TOKEN_TYPE.BNB);
-				break;
-			}
-			case TOKEN_TYPE.WSG: {
-				setSecondPairValue(TOKEN_TYPE.BNB);
-				break;
-			}
-			case TOKEN_TYPE.USDT: {
-				setSecondPairValue(TOKEN_TYPE.BUSD);
-				break;
-			}
-			default: {
-				break;
-			}
-		}
+		// switch (pair) {
+		// 	case 'default': {
+		// 		setSecondPairValue('default')
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.BNB: {
+		// 		setSecondPairValue(TOKEN_TYPE.MILKY)
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.MILKY: {
+		// 		setSecondPairValue(TOKEN_TYPE.BNB);
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.BUSD: {
+		// 		setSecondPairValue(TOKEN_TYPE.BNB);
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.WSG: {
+		// 		setSecondPairValue(TOKEN_TYPE.BNB);
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.USDT: {
+		// 		setSecondPairValue(TOKEN_TYPE.BUSD);
+		// 		break;
+		// 	}
+		// 	default: {
+		// 		break;
+		// 	}
+		// }
 	}
 
 	const updateSecondPairValue = (pair: string | null): void => {
 		setSecondPairValue(pair);
-		switch (pair) {
-			case 'default': {
-				setPairValue('default')
-				break;
-			}
-			case TOKEN_TYPE.MILKY: {
-				setPairValue(TOKEN_TYPE.BNB);
-				break;
-			}
-			case TOKEN_TYPE.BUSD: {
-				setPairValue(TOKEN_TYPE.USDT);
-				break;
-			}
-			case TOKEN_TYPE.WSG: {
-				setPairValue(TOKEN_TYPE.MILKY);
-				break;
-			}
-			case TOKEN_TYPE.BNB: {
-				setPairValue(TOKEN_TYPE.MILKY);
-				break;
-			}
-			case TOKEN_TYPE.USDT: {
-				setPairValue(TOKEN_TYPE.BUSD);
-				break;
-			}
-			default: {
-				break;
-			}
-		}
+		// switch (pair) {
+		// 	case 'default': {
+		// 		setPairValue('default')
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.MILKY: {
+		// 		setPairValue(TOKEN_TYPE.BNB);
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.BUSD: {
+		// 		setPairValue(TOKEN_TYPE.USDT);
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.WSG: {
+		// 		setPairValue(TOKEN_TYPE.MILKY);
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.BNB: {
+		// 		setPairValue(TOKEN_TYPE.MILKY);
+		// 		break;
+		// 	}
+		// 	case TOKEN_TYPE.USDT: {
+		// 		setPairValue(TOKEN_TYPE.BUSD);
+		// 		break;
+		// 	}
+		// 	default: {
+		// 		break;
+		// 	}
+		// }
 	}
 
 	const getOptionValue = (index: number) => {
@@ -336,10 +347,70 @@ const Swap = () => {
 		setWaiting(false);
 	}
 
+	const getAddressFromToken = (name: string) => {
+		// if(name === TOKEN_TYPE.BNB) return TOKEN_DATA[TOKEN_TYPE.BNB].address
+		// else if(name === TOKEN_TYPE.BUSD) return TOKEN_DATA[TOKEN_TYPE.BUSD].address
+		// else if(name === TOKEN_TYPE.MILKY) return TOKEN_DATA[TOKEN_TYPE.MILKY].address
+		// else if(name === TOKEN_TYPE.USDT) return TOKEN_DATA[TOKEN_TYPE.USDT].address
+		// else if(name === TOKEN_TYPE.WSG) return TOKEN_DATA[TOKEN_TYPE.WSG].address
+		// else {
+		// 	return ''
+		// }
+		if(name === TOKEN_TYPE.BNB) return TOKEN_TYPE.BNB
+		else if(name === TOKEN_TYPE.BUSD) return TOKEN_TYPE.BUSD
+		else if(name === TOKEN_TYPE.MILKY) return TOKEN_TYPE.MILKY
+		else if(name === TOKEN_TYPE.USDT) return TOKEN_TYPE.USDT
+		else if(name === TOKEN_TYPE.WSG) return TOKEN_TYPE.WSG
+		else {
+			return ''
+		}
+	}
+
+	const getCommonPattern = () => {
+		let isPair = false
+		for(let i = 0; i < TOKEN_PAIR.length; i ++) {
+			const pairItems = TOKEN_PAIR[i].value.split('/')
+			if((pairItems[0] === pairValue && pairItems[1] === secondPairValue) || (pairItems[0] === secondPairValue && pairItems[1] === pairValue)) {
+				isPair = true
+			}
+		}
+
+		if(isPair) {
+			return ''
+		} else {
+			let firstRelatedPatterns = [], secondRelatedPatterns = []
+			let commonPattern = ''
+			for(let i = 0; i < TOKEN_PAIR.length; i ++) {
+				let pattern = TOKEN_PAIR[i].value
+				if(TOKEN_PAIR[i].value.includes(pairValue as string)) {
+					pattern = pattern.replace(pairValue as string, '')
+					pattern = pattern.replace('/', '')
+					firstRelatedPatterns.push(pattern)
+				} 
+				if(TOKEN_PAIR[i].value.includes(secondPairValue as string)) {
+					pattern = pattern.replace(secondPairValue as string, '')
+					pattern = pattern.replace('/', '')
+					secondRelatedPatterns.push(pattern)
+				} 
+			}
+
+			for(let i = 0; i < firstRelatedPatterns.length; i ++) {
+				for(let j  = 0; j < secondRelatedPatterns.length; j ++) {
+					if(firstRelatedPatterns[i] === secondRelatedPatterns[j]) {
+						commonPattern = firstRelatedPatterns[i]
+						break;
+					}
+				}
+			}
+
+			return getAddressFromToken(commonPattern)
+		}
+	}
+
 	const handleSwap = async () => {
-		if (appState.address !== '' && pairValue !== 'default' && pairValue !== 'default') {
+		if (appState.address !== '' && pairValue !== 'default' && secondPairValue !== 'default') {
 			setWaiting(true)
-			await swapTokensToEth(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, parseFloat(slippage), parseFloat(deadline))
+			await swapTokensToEth(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, parseFloat(slippage), parseFloat(deadline), getCommonPattern())
 			setWaiting(false)
 		}
 	}
@@ -379,7 +450,15 @@ const Swap = () => {
 	}
 
 	async function handlePairRate(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE) {
-		setRate(await getRateFromPair(tokenA, tokenB))
+		const commonToken : TOKEN_TYPE | string = getCommonPattern()
+		if(commonToken === '') {
+			setRate(await getRateFromPair(tokenA, tokenB))
+		} else {
+			const rate1 = await getRateFromPair(tokenA, commonToken as TOKEN_TYPE)
+			const rate2 = await getRateFromPair(tokenB, commonToken as TOKEN_TYPE)
+
+			setRate(rate1/rate2)
+		}
 	}
 
 	async function handleLpBalance(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE) {
@@ -427,8 +506,9 @@ const Swap = () => {
 		if (secondPairValue === TOKEN_TYPE.BNB) {
 			setBalanceB(formatDecimals(balance, 18))
 		}
-		else
+		else {
 			handleSecondTokenBalance(secondPairValue as TOKEN_TYPE)
+		}
 	}, [secondPairValue, balance])
 
 	useEffect(() => {
