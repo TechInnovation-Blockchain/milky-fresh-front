@@ -9,12 +9,14 @@ import { str2BigNumber } from './numbers'
 import toast from "react-hot-toast"
 import {
     BigNumber,
+    Contract,
     ContractReceipt,
     ethers,
 } from "ethers"
 
 import { ContractInformation, NetworkId } from 'config/constants/types'
 import BNB from 'config/contracts/BNB'
+import BUSD from 'config/contracts/BUSD'
 import { UserState } from 'bnc-onboard/dist/src/interfaces'
 
 import milkyLogo from "assets/images/milky.png"
@@ -57,7 +59,7 @@ export const TOKEN_DATA = {
     [TOKEN_TYPE.BUSD as TOKEN_TYPE]: {
         value: 'busd',
         label: 'BUSD',
-        address: '',
+        address: '0xAcAb88ac047dbd6cE7ef18317B3ddf9138953c89',
         image: busdLogo,
         chainlink: '0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa'
     },
@@ -113,7 +115,7 @@ export const TOKEN_PAIR = [
 export const CONTRACT_TABLE = {
     [TOKEN_TYPE.BNB]: BNB,
     [TOKEN_TYPE.MILKY]: Milky,
-    // [TOKEN_TYPE.BUSD]: BUSD,
+    [TOKEN_TYPE.BUSD]: BUSD,
     // [TOKEN_TYPE.WSG]: WSG,
     // [TOKEN_TYPE.USDT]: USDT,
 } as {
@@ -138,6 +140,7 @@ export function setupProvider(userState: any) {
         walletProvider = new ethers.providers.Web3Provider(
             userState.provider
         )
+
         JsonProvider = new ethers.providers.JsonRpcProvider(
             NetworkRPC[getNetworkId()] as string
         )
@@ -153,7 +156,7 @@ export async function getAddress() {
 }
 
 export async function getBalance() {
-    return walletProvider ? (await walletProvider.getBalance(getAddress())).toString() : '0'
+    return walletProvider ? (await walletProvider.getBalance(await getAddress())).toString() : '0'
 }
 
 export function getSigner() {
@@ -169,7 +172,11 @@ export async function getDecimalFunc(token: TOKEN_TYPE): Promise<number> {
         JsonProvider
     )
 
-    return await contract.decimals()
+    try {
+        return await contract.decimals()
+    } catch {
+        return 0
+    }
 }
 
 export async function getPairData() {
@@ -188,14 +195,25 @@ export async function getPairData() {
             TOKEN_DATA[tokenPair.key1.value].address === '') {
             continue
         }
-        const pairAddress = await contractFactory.getPair(TOKEN_DATA[tokenPair.key0.value].address, TOKEN_DATA[tokenPair.key1.value].address) as string
+        let pairAddress = ZERO_ADDRESS
+
+        try {
+            pairAddress = await contractFactory.getPair(TOKEN_DATA[tokenPair.key0.value].address, TOKEN_DATA[tokenPair.key1.value].address) as string
+        } catch { }
+
         if (pairAddress !== ZERO_ADDRESS) {
             const contractPair = new ethers.Contract(
                 pairAddress,
                 MilkyPair.abi,
                 JsonProvider
             )
-            const balance = await contractPair.balanceOf(getAddress()) as BigNumber
+
+            let balance = BigNumber.from(0)
+
+            try {
+                balance = await contractPair.balanceOf(getAddress()) as BigNumber
+            } catch { }
+
             if (!balance.isZero()) {
                 result.push(tokenPair)
             }
@@ -212,7 +230,11 @@ export async function getDecimalToken(token: string): Promise<number> {
         JsonProvider
     )
 
-    return await contract.decimals()
+    try {
+        return await contract.decimals()
+    } catch {
+        return 0
+    }
 }
 
 export async function getLpData(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, address: string): Promise<any> {
@@ -236,7 +258,11 @@ export async function getLpData(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, address:
     const addressA = CONTRACT_TABLE[tokenA].address[getNetworkId()]
     const addressB = CONTRACT_TABLE[tokenB].address[getNetworkId()]
 
-    const lpAddress = await contract.getPair(addressA, addressB)
+    let lpAddress = ''
+
+    try {
+        lpAddress = await contract.getPair(addressA, addressB)
+    } catch { }
 
     const lpContract = new ethers.Contract(
         lpAddress,
@@ -244,13 +270,27 @@ export async function getLpData(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, address:
         JsonProvider
     )
 
-    const lpBalance = await lpContract.balanceOf(address)
-    const lpTotalSupply = await lpContract.totalSupply()
+    let lpBalance = '0'
+
+    try {
+        lpBalance = await lpContract.balanceOf(address)
+    } catch { }
+
+    let lpTotalSupply = '1'
+
+    try {
+        lpTotalSupply = await lpContract.totalSupply()
+    } catch { }
 
     const decimals = await getDecimalToken(lpAddress)
 
     let _reserveA = 0.0, _reserveB = 0.0
-    const token0 = await pairContract.token0()
+    let token0 = ''
+
+    try {
+        token0 = await pairContract.token0()
+    } catch { }
+
     if (addressA === token0) {
         _reserveA = formatDecimals(_reserve1, await getDecimalToken(addressB))
         _reserveB = formatDecimals(_reserve0, await getDecimalToken(addressA))
@@ -282,7 +322,11 @@ export async function getPairAddress(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): Pr
     const address0 = CONTRACT_TABLE[tokenA].address[getNetworkId()]
     const address1 = CONTRACT_TABLE[tokenB].address[getNetworkId()]
 
-    return await contract.getPair(address0, address1)
+    try {
+        return await contract.getPair(address0, address1)
+    } catch {
+        return ''
+    }
 }
 
 export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): Promise<number> {
@@ -293,6 +337,7 @@ export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): P
     const address1 = CONTRACT_TABLE[tokenB].address[getNetworkId()]
 
     const pairAddress = await getPairAddress(tokenA, tokenB) as string
+
     if (pairAddress === ZERO_ADDRESS) {
         return 0
     }
@@ -302,7 +347,12 @@ export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): P
         JsonProvider
     )
 
-    const token0 = await pairContract.token0() as string
+    let token0 = ZERO_ADDRESS
+
+    try {
+        token0 = await pairContract.token0() as string
+    } catch { }
+
     if (token0 === ZERO_ADDRESS) {
         return 0
     }
@@ -352,11 +402,11 @@ export async function approve(address: string, to: string, amount: string | BigN
     }
 }
 
-export async function approveLP(lpToken: string, amount: string) {
+export async function approveLP(lpToken: string, amount: string | BigNumber) {
     await approve(lpToken, MasterChef.address[getNetworkId()], amount, await getDecimalToken(lpToken))
 }
 
-export async function approveToken(token: TOKEN_TYPE, amount: string) {
+export async function approveToken(token: TOKEN_TYPE, amount: string | BigNumber) {
     if (!CONTRACT_TABLE[token] || !CONTRACT_TABLE[token]) return
     await approve(CONTRACT_TABLE[token].address[getNetworkId()], MilkyRouter.address[getNetworkId()], amount, await getDecimalFunc(token))
 }
@@ -368,8 +418,16 @@ export async function getPairDataFromLpAddr(lpAddr: string): Promise<any> {
         JsonProvider
     )
 
-    const token0 = await contract.token0() as string
-    const token1 = await contract.token1() as string
+    let token0 = '', token1 = ''
+
+    try {
+        token0 = await contract.token0() as string
+    } catch { }
+
+    try {
+        token1 = await contract.token1() as string
+    } catch { }
+
     let tokenA = '', tokenB = ''
 
     for (let i = 0; i < TOKEN_LIST.length; i++) {
@@ -394,7 +452,13 @@ export async function getRewardsPerDay(pid: number) {
         MasterChef.abi,
         JsonProvider
     )
-    const totalAllocPoint = await contract.totalAllocPoint() as BigNumber
+
+    let totalAllocPoint = BigNumber.from(0)
+
+    try {
+        totalAllocPoint = await contract.totalAllocPoint() as BigNumber
+    } catch { }
+
     if (totalAllocPoint.isZero()) {
         return 0
     }
@@ -403,8 +467,14 @@ export async function getRewardsPerDay(pid: number) {
     const latestBlockNumber = await JsonProvider.getBlockNumber()
     const timeDuration = (await JsonProvider.getBlock(latestBlockNumber)).timestamp - (await JsonProvider.getBlock((pool.lastRewardBlock as BigNumber).toNumber())).timestamp
 
-    const multiplier = await contract.getMultiplier(pool.lastRewardBlock, latestBlockNumber) as BigNumber
-    const milkyPerBlock = await contract.milkyPerBlock() as BigNumber
+    let multiplier = BigNumber.from(0), milkyPerBlock = BigNumber.from(0)
+    try {
+        multiplier = await contract.getMultiplier(pool.lastRewardBlock, latestBlockNumber) as BigNumber
+    } catch { }
+
+    try {
+        milkyPerBlock = await contract.milkyPerBlock() as BigNumber
+    } catch { }
 
     const result = multiplier.mul(milkyPerBlock).mul(pool.allocPoint as BigNumber).mul(BigNumber.from(3600 * 24)).div(totalAllocPoint.mul(BigNumber.from(timeDuration === 0 ? 1 : timeDuration)))
     return formatDecimals(result, 18)
@@ -432,7 +502,12 @@ export async function getAllPairsLength() {
         JsonProvider
     )
 
-    return await contractFactory.allPairsLength()
+    try {
+        return await contractFactory.allPairsLength()
+    }
+    catch {
+        return 0
+    }
 }
 
 export async function getTotalLiquidity() {
@@ -442,7 +517,12 @@ export async function getTotalLiquidity() {
         JsonProvider
     )
 
-    const poolLength = ((await contract.poolLength()) as BigNumber).toNumber()
+    let poolLength = 0
+
+    try {
+        poolLength = ((await contract.poolLength()) as BigNumber).toNumber()
+    } catch { }
+
     let totalValue = 0.0
     for (let i = 0; i < poolLength; i++) {
         totalValue += await getCurrentPoolTVL(i)
@@ -458,7 +538,11 @@ export async function getCurrentMilkyPrice() {
         JsonProvider
     )
 
-    const poolLength = ((await contract.poolLength()) as BigNumber).toNumber()
+    let poolLength = 0
+
+    try {
+        poolLength = ((await contract.poolLength()) as BigNumber).toNumber()
+    } catch { }
 
     let index = -1
     for (let i = 0; i < poolLength; i++) {
@@ -476,7 +560,12 @@ export async function getCurrentMilkyPrice() {
         }
     }
 
-    const totalAllocPoint = await contract.totalAllocPoint() as BigNumber
+    let totalAllocPoint = BigNumber.from(0)
+
+    try {
+        totalAllocPoint = await contract.totalAllocPoint() as BigNumber
+    } catch { }
+
     if (totalAllocPoint.isZero()) {
         return 0
     }
@@ -507,45 +596,92 @@ export async function getCurrentMilkyPrice() {
     }
 }
 
+export async function getCurrentBalanceToUSD(amount: number, lpAddr: string) {
+    const lpContract = new ethers.Contract(
+        lpAddr,
+        MilkyPair.abi,
+        JsonProvider
+    )
+
+    if (Milky.address[getNetworkId()] === lpAddr) return 0.0
+
+    const { _reserve0, _reserve1 } = await lpContract.getReserves()
+
+    const reserve0Float = formatDecimals(_reserve0, await getDecimalToken(lpAddr))
+    const reserve1Float = formatDecimals(_reserve1, await getDecimalToken(lpAddr))
+    const totalSupply = formatDecimals(await lpContract.totalSupply(), await getDecimalToken(lpAddr))
+
+    const data = await getPairDataFromLpAddr(lpAddr)
+    let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE)
+    let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE)
+
+    return amount * reserve0Float * tokenAPrice / totalSupply + amount * reserve1Float * tokenBPrice / totalSupply
+}
+
 export async function getCurrentPoolTVL(pid: number) {
     const contractMaster = new ethers.Contract(
         MasterChef.address[getNetworkId()],
         MasterChef.abi,
         JsonProvider
     )
-    const totalAllocPoint = await contractMaster.totalAllocPoint() as BigNumber
+    let totalAllocPoint = BigNumber.from(0)
+
+    try {
+        totalAllocPoint = await contractMaster.totalAllocPoint() as BigNumber
+    } catch { }
+
     if (totalAllocPoint.isZero()) {
         return 0
     }
 
-    const pool = await contractMaster.poolInfo(pid)
+    let pool = null
+
+    try {
+        pool = await contractMaster.poolInfo(pid)
+    } catch { }
+
+    if (pool === null) return 0
+
     const lpAddress = pool.lpToken as string
-    const contractLp = new ethers.Contract(
-        lpAddress,
-        MilkyPair.abi,
-        JsonProvider
-    )
 
-    const data = await getPairDataFromLpAddr(lpAddress)
-    const { _reserve0, _reserve1 } = await contractLp.getReserves()
+    if (lpAddress === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
+        let amount = 0
 
-    const reserve0Float = formatDecimals(_reserve0, await getDecimalToken(lpAddress))
-    const reserve1Float = formatDecimals(_reserve1, await getDecimalToken(lpAddress))
+        try {
+            amount = await contractMaster.userInfo(pid, getAddress())
+        } catch { }
 
-    let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE)
-    let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE)
+        const price = (await getCurrentMilkyPrice()) * amount
 
-    let tokenAValue = tokenAPrice * reserve0Float
-    let tokenBValue = tokenBPrice * reserve1Float
+        return parseFloat(price.toFixed(6))
+    } else {
+        const contractLp = new ethers.Contract(
+            lpAddress,
+            MilkyPair.abi,
+            JsonProvider
+        )
 
-    if (tokenAValue === 0) {
-        tokenAValue = tokenBValue
-    } else if (tokenBValue === 0) {
-        tokenBValue = tokenAValue
+        const data = await getPairDataFromLpAddr(lpAddress)
+        const { _reserve0, _reserve1 } = await contractLp.getReserves()
+
+        const reserve0Float = formatDecimals(_reserve0, await getDecimalToken(lpAddress))
+        const reserve1Float = formatDecimals(_reserve1, await getDecimalToken(lpAddress))
+
+        let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE)
+        let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE)
+
+        let tokenAValue = tokenAPrice * reserve0Float
+        let tokenBValue = tokenBPrice * reserve1Float
+
+        if (tokenAValue === 0) {
+            tokenAValue = tokenBValue
+        } else if (tokenBValue === 0) {
+            tokenBValue = tokenAValue
+        }
+
+        const liquidityTvl = tokenAValue + tokenBValue
+        return parseFloat((liquidityTvl * (pool.allocPoint as BigNumber).toNumber() / totalAllocPoint.toNumber()).toFixed(6))
     }
-
-    const liquidityTvl = tokenAValue + tokenBValue
-    return parseFloat((liquidityTvl * (pool.allocPoint as BigNumber).toNumber() / totalAllocPoint.toNumber()).toFixed(6))
 }
 
 export async function getCurrentPoolAPR(tvl: number, rewards: number) {
@@ -560,32 +696,53 @@ export async function getCurrentPoolAPR(tvl: number, rewards: number) {
     return parseFloat((rewards * 365 / rate * bnbPrice / tvl * 100).toFixed(2))
 }
 
-export async function getPoolDataFromAddress(address: string): Promise<any> {
+export async function searchPoolData(pattern: string): Promise<any> {
+    const searchToken = TOKEN_LIST.find((value) => TOKEN_DATA[value].address === pattern)
+    if (searchToken) {
+        pattern = TOKEN_DATA[searchToken].value
+    }
+
     const contract = new ethers.Contract(
         MasterChef.address[getNetworkId()],
         MasterChef.abi,
         JsonProvider
     )
 
-    const poolLength = ((await contract.poolLength()) as BigNumber).toNumber()
+    let poolLength = 0
+    try {
+        poolLength = ((await contract.poolLength()) as BigNumber).toNumber()
+    } catch { }
 
     let poolDataList = []
 
     for (let i = 0; i < poolLength; i++) {
         const pool = await contract.poolInfo(i)
+        let pairData = null
         if (pool.lpToken === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
-            continue
-        }
-        if (pool.lpToken === address) {
-            const pairData = await getPairDataFromLpAddr(pool.lpToken)
-            poolDataList.push({
+            pairData = {
+                address: pool.lpToken,
+                tokenA: TOKEN_TYPE.MILKY,
+                tokenB: TOKEN_TYPE.MILKY,
+                allocPoint: pool.allocPoint,
+                lastRewardBlock: pool.lastRewardBlock,
+                pid: i,
+            }
+        } else {
+            pairData = await getPairDataFromLpAddr(pool.lpToken)
+            pairData = {
                 address: pool.lpToken,
                 tokenA: pairData.tokenA,
                 tokenB: pairData.tokenB,
                 allocPoint: pool.allocPoint,
                 lastRewardBlock: pool.lastRewardBlock,
                 pid: i,
-            })
+            }
+        }
+        if (pattern.toLowerCase().indexOf(pairData.tokenA) >= 0 ||
+            pattern.toLowerCase().indexOf(pairData.tokenB) >= 0) {
+            poolDataList.push(pairData)
+        } else if (pool.lpToken === pattern) {
+            poolDataList.push(pairData)
         }
     }
 
@@ -605,27 +762,27 @@ export async function getPoolDataFromPoint(point: number): Promise<any> {
 
     for (let i = 0; i < poolLength; i++) {
         const pool = await contract.poolInfo(i)
-        if (pool.lpToken === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
-            const pairData = await getPairDataFromLpAddr(pool.lpToken)
-            poolDataList.push({
-                address: pool.lpToken,
-                tokenA: pairData.tokenA,
-                tokenB: pairData.tokenB,
-                allocPoint: pool.allocPoint,
-                lastRewardBlock: pool.lastRewardBlock,
-                pid: i,
-            })
-        }
         if (BigNumber.from(pool.allocPoint).toNumber() === point) {
-            const pairData = await getPairDataFromLpAddr(pool.lpToken)
-            poolDataList.push({
-                address: pool.lpToken,
-                tokenA: pairData.tokenA,
-                tokenB: pairData.tokenB,
-                allocPoint: pool.allocPoint,
-                lastRewardBlock: pool.lastRewardBlock,
-                pid: i,
-            })
+            if (pool.lpToken === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
+                poolDataList.push({
+                    address: pool.lpToken,
+                    tokenA: TOKEN_TYPE.MILKY,
+                    tokenB: TOKEN_TYPE.MILKY,
+                    allocPoint: pool.allocPoint,
+                    lastRewardBlock: pool.lastRewardBlock,
+                    pid: i,
+                })
+            } else {
+                const pairData = await getPairDataFromLpAddr(pool.lpToken)
+                poolDataList.push({
+                    address: pool.lpToken,
+                    tokenA: pairData.tokenA,
+                    tokenB: pairData.tokenB,
+                    allocPoint: pool.allocPoint,
+                    lastRewardBlock: pool.lastRewardBlock,
+                    pid: i,
+                })
+            }
         }
     }
 
@@ -714,10 +871,19 @@ export async function addLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amoun
     try {
         let tx;
         if (tokenA === TOKEN_TYPE.BNB) {
-            await approveToken(tokenB, amountB)
+            const lpContract = new ethers.Contract(
+                CONTRACT_TABLE[tokenB].address[getNetworkId()],
+                CONTRACT_TABLE[tokenB].abi,
+                getSigner()
+            )
+            const allowance = formatDecimals(await lpContract.allowance(getAddress(), MilkyRouter.address[getNetworkId()]), await getDecimalToken(CONTRACT_TABLE[tokenB].address[getNetworkId()]))
+            if (allowance < parseFloat(amountB)) {
+                await approveToken(tokenB, ethers.constants.MaxUint256)
+            }
+
             const amountBigNumber = str2BigNumber(amountB, await getDecimalFunc(tokenB))
             tx = await contractRouter.addLiquidityETH(
-                Milky.address[getNetworkId()],
+                CONTRACT_TABLE[tokenB as TOKEN_TYPE].address[getNetworkId()],
                 amountBigNumber,
                 0,
                 0,
@@ -728,10 +894,20 @@ export async function addLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amoun
                 }
             )
         } else if (tokenB === TOKEN_TYPE.BNB) {
-            await approveToken(tokenA, amountA)
+            const lpContract = new ethers.Contract(
+                CONTRACT_TABLE[tokenA].address[getNetworkId()],
+                CONTRACT_TABLE[tokenA].abi,
+                getSigner()
+            )
+            const allowance = formatDecimals(await lpContract.allowance(getAddress(), MilkyRouter.address[getNetworkId()]), await getDecimalToken(CONTRACT_TABLE[tokenA].address[getNetworkId()]))
+
+            if (allowance < parseFloat(amountA)) {
+                await approveToken(tokenA, ethers.constants.MaxUint256)
+            }
+
             const amountBigNumber = str2BigNumber(amountA, await getDecimalFunc(tokenA))
             tx = await contractRouter.addLiquidityETH(
-                Milky.address[getNetworkId()],
+                CONTRACT_TABLE[tokenA as TOKEN_TYPE].address[getNetworkId()],
                 amountBigNumber,
                 0,
                 0,
@@ -742,7 +918,17 @@ export async function addLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amoun
                 }
             )
         } else {
-            await approveToken(tokenA, amountA)
+
+            const lpContract = new ethers.Contract(
+                CONTRACT_TABLE[tokenA].address[getNetworkId()],
+                CONTRACT_TABLE[tokenA].abi,
+                getSigner()
+            )
+            const allowance = formatDecimals(await lpContract.allowance(getAddress(), MilkyRouter.address[getNetworkId()]), await getDecimalToken(CONTRACT_TABLE[tokenA].address[getNetworkId()]))
+            if (allowance < parseFloat(amountA)) {
+                await approveToken(tokenA, ethers.constants.MaxUint256)
+            }
+
             const amountABigNumber = str2BigNumber(amountA, await getDecimalFunc(tokenA))
             const amountBBigNumber = str2BigNumber(amountB, await getDecimalFunc(tokenB))
             tx = await contractRouter.addLiquidity(
@@ -777,6 +963,14 @@ export async function addLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amoun
     }
 }
 
+export async function getMilkyPair(): Promise<void> {
+    const contract = new ethers.Contract(
+        MilkyFactory.address[getNetworkId()],
+        MilkyFactory.abi,
+        JsonProvider
+    )
+}
+
 export async function getTokenBalance(value: TOKEN_TYPE, address: string): Promise<number> {
     if (!CONTRACT_TABLE[value] || !CONTRACT_TABLE[value]) return 0
 
@@ -786,8 +980,24 @@ export async function getTokenBalance(value: TOKEN_TYPE, address: string): Promi
         JsonProvider,
     )
 
+    const balance = await contract.balanceOf(address)
 
     return formatDecimals(await contract.balanceOf(address), await getDecimalFunc(value))
+}
+
+export async function getStakedBalance(pid: number): Promise<any> {
+    const contract = new ethers.Contract(
+        MasterChef.address[getNetworkId()],
+        MasterChef.abi,
+        getSigner()
+    )
+
+    const value = await contract.userInfo(pid, getAddress())
+
+    return {
+        realBalance: value[0],
+        balance: formatDecimals(value[0], 18)
+    }
 }
 
 export async function getPendingMilky(pid: number, lpAddr: string) {
@@ -797,7 +1007,14 @@ export async function getPendingMilky(pid: number, lpAddr: string) {
         getSigner()
     )
 
-    return formatDecimals(await contract.pendingMilky(pid, getAddress()), await getDecimalToken(lpAddr))
+    const pendingMilky = await contract.pendingMilky(pid, getAddress())
+
+    return {
+        rewards: formatDecimals(pendingMilky[0], await getDecimalToken(lpAddr)),
+        instant: formatDecimals(pendingMilky[1], await getDecimalToken(lpAddr)),
+        locked: formatDecimals(pendingMilky[2], await getDecimalToken(lpAddr)),
+        unlocked: formatDecimals(pendingMilky[3], await getDecimalToken(lpAddr)),
+    }
 }
 
 export async function getRewardMilkyTokens(pid: number, address: string, amount: string | BigNumber) {
@@ -853,7 +1070,11 @@ export async function unstakeTokensFromPool(pid: number, address: string, amount
 
         const events = receipt.events
         if (events && events.length > 0) {
-            toast.success("Successfully unstake LP tokens")
+            if (amountBigNumber.isZero()) {
+                toast.success(" Successfully harvested rewards!")
+            } else {
+                toast.success("Successfully unstake LP tokens!")
+            }
         }
     } catch (error: any) {
         switch (error.code) {
@@ -875,7 +1096,7 @@ export async function stakeTokensToPool(pid: number, amount: string, lpAddress: 
 
     const allowance = formatDecimals(await lpContract.allowance(getAddress(), MasterChef.address[getNetworkId()]), await getDecimalToken(lpAddress))
     if (allowance < parseFloat(amount)) {
-        await approveLP(lpAddress, balance.toString())
+        await approveLP(lpAddress, ethers.constants.MaxUint256)
     }
 
     const contract = new ethers.Contract(
@@ -893,17 +1114,17 @@ export async function stakeTokensToPool(pid: number, amount: string, lpAddress: 
 
         const events = receipt.events
         if (events && events.length > 0) {
-            toast.success("Deposit LP tokens successfully.")
+            toast.success("Staking success.")
         }
     } catch (error: any) {
         switch (error.code) {
             case 4001:
                 break
             case "INSUFFICIENT_FUNDS":
-                toast.error("Insufficient fund in your wallet.")
+                toast.error("Insufficient balance.")
                 break
             default:
-                toast.error("Deposit LP tokens failed.")
+                toast.error("Staking failed.")
                 break
         }
     }
@@ -912,7 +1133,7 @@ export async function stakeTokensToPool(pid: number, amount: string, lpAddress: 
 export async function getLPBalance(token: string): Promise<any> {
     const contract = new ethers.Contract(
         token,
-        MilkyPair.abi,
+        token === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? Milky.abi : MilkyPair.abi,
         JsonProvider
     )
 
@@ -933,7 +1154,7 @@ export async function getLPBalance(token: string): Promise<any> {
 export async function getPoolBalance(token: string): Promise<any> {
     const contract = new ethers.Contract(
         token,
-        MilkyPair.abi,
+        token === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? Milky.abi : MilkyPair.abi,
         JsonProvider
     )
 
@@ -944,10 +1165,8 @@ export async function getPoolBalance(token: string): Promise<any> {
     }
 }
 
-export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amountIn: string, amountOutMin: string, address: string, slippage: number, deadline: number) {
-    if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB]) return 0
-
-    // console.log('signer', getSigner())
+export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amountIn: string, amountOutMin: string, address: string, slippage: number, deadline: number, commonPattern: TOKEN_TYPE | string) {
+    if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB] || commonPattern === '') return 0
 
     const contractRouter = new ethers.Contract(
         MilkyRouter.address[getNetworkId()],
@@ -964,26 +1183,54 @@ export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, am
         if (tokenA === TOKEN_TYPE.BNB) {
             tx = await contractRouter.swapExactETHForTokens(
                 str2BigNumber(minimum, decimalsA),
-                [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]],
+                commonPattern !== '' ?
+                    [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[commonPattern as TOKEN_TYPE].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]]
+                    :
+                    [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]],
                 address,
                 BigNumber.from(await getDeadlineTime(deadline)),
                 { value: ethers.utils.parseEther(amountIn) }
             )
         } else if (tokenB === TOKEN_TYPE.BNB) {
-            await approveToken(tokenA, amountIn)
+            const lpContract = new ethers.Contract(
+                CONTRACT_TABLE[tokenA].address[getNetworkId()],
+                CONTRACT_TABLE[tokenA].abi,
+                getSigner()
+            )
+            const allowance = formatDecimals(await lpContract.allowance(getAddress(), MilkyRouter.address[getNetworkId()]), await getDecimalToken(CONTRACT_TABLE[tokenA].address[getNetworkId()]))
+
+            if (allowance < parseFloat(amountIn)) {
+                await approveToken(tokenA, ethers.constants.MaxUint256)
+            }
+
             tx = await contractRouter.swapExactTokensForETH(
                 str2BigNumber(amountIn, decimalsA),
                 str2BigNumber(minimum, decimalsA),
-                [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]],
+                commonPattern !== '' ?
+                    [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[commonPattern as TOKEN_TYPE].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]]
+                    :
+                    [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]],
                 address,
                 BigNumber.from(await getDeadlineTime(deadline)),
             )
         } else {
-            await approveToken(tokenA, amountIn)
+            const lpContract = new ethers.Contract(
+                CONTRACT_TABLE[tokenA].address[getNetworkId()],
+                CONTRACT_TABLE[tokenA].abi,
+                getSigner()
+            )
+            const allowance = formatDecimals(await lpContract.allowance(getAddress(), MilkyRouter.address[getNetworkId()]), await getDecimalToken(CONTRACT_TABLE[tokenA].address[getNetworkId()]))
+            if (allowance < parseFloat(amountIn)) {
+                await approveToken(tokenA, ethers.constants.MaxUint256)
+            }
+
             tx = await contractRouter.swapExactTokensForTokens(
                 str2BigNumber(amountIn, decimalsA),
                 str2BigNumber(minimum, decimalsA),
-                [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]],
+                commonPattern !== '' ?
+                    [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[commonPattern as TOKEN_TYPE].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]]
+                    :
+                    [CONTRACT_TABLE[tokenA].address[getNetworkId()], CONTRACT_TABLE[tokenB].address[getNetworkId()]],
                 address,
                 BigNumber.from(await getDeadlineTime(deadline)),
             )

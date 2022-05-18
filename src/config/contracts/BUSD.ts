@@ -1,8 +1,8 @@
 import { NetworkId, ContractAddress, ContractInformation } from 'config/constants/types'
 
-const Milky: ContractInformation = {
+const BUSD: ContractInformation = {
     address: {
-        [NetworkId.BscTestnet]: '0x37078997d9babfB9C16f35cE5736B5929c959032',
+        [NetworkId.BscTestnet]: '0xAcAb88ac047dbd6cE7ef18317B3ddf9138953c89',
     } as ContractAddress,
     abi: [
         {
@@ -636,4 +636,4 @@ const Milky: ContractInformation = {
     ],
 };
 
-export default Milky;
+export default BUSD;

@@ -1,27 +1,31 @@
 import {
 	Box, Container, Stack, Divider, TextField, InputAdornment,
 	Typography, Table, TableBody, TableCell, TableContainer,
-	TableRow, TableHead, Collapse, Button, Grid, CircularProgress
+	TableRow, TableHead, Collapse, Button, Grid, CircularProgress,
+	Link
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { Search, Help } from '@mui/icons-material'
+import { Search, Help, Key } from '@mui/icons-material'
 import { fCurrency, fPercent } from 'utils/numbers'
 import useResponsive from 'hooks/useResponsive'
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import { web3Modal } from 'utils/web3Modal'
 import { providers } from 'ethers'
 
 import {
 	TOKEN_DATA,
 	getPoolDataFromPoint,
-	getPoolDataFromAddress,
+	searchPoolData,
 	getPairDataFromLpAddr,
 	TOKEN_TYPE,
 	getPendingMilky,
 	unstakeTokensFromPool,
 	getCurrentPoolTVL,
 	getRewardsPerDay,
-	getCurrentPoolAPR
+	getCurrentPoolAPR,
+	getMilkyPair,
+	getStakedBalance,
+	getCurrentBalanceToUSD
 } from 'utils/integrate'
 
 import CustomizedDialogs from 'components/StakeDialog'
@@ -129,7 +133,6 @@ const FarmBox = ({ text, type, point, farmClicked }: FarmBoxProps) => {
 		<CustomFarmBox sx={{ backgroundColor }} onClick={() => click()}>
 			<Stack direction='row' alignItems='center' justifyContent='space-between'>
 				<CustomTypography>{text}</CustomTypography>
-				<a href='/swap' style={{ color: '#1a73e8', textDecoration: 'underline' }}>Add Liquidity</a>
 			</Stack>
 		</CustomFarmBox>
 	);
@@ -157,19 +160,18 @@ const Farm = () => {
 	}
 
 	const getSearchData = async () => {
-		setLoading(true)
-		setPoolData(await getPoolDataFromAddress(searchPattern))
-		setLoading(false)
+		if (searchPattern !== '') {
+			setLoading(true)
+			setPoolData(await searchPoolData(searchPattern))
+			setLoading(false)
+		} else {
+			getPoolsData()
+		}
 	}
 
 	useEffect(() => {
-		console.log('point', point)
 		getPoolsData()
 	}, [point])
-
-	useEffect(() => {
-		getSearchData()
-	}, [searchPattern])
 
 	const farmClicked = async (point: number) => {
 		setPoint(point)
@@ -202,6 +204,7 @@ const Farm = () => {
 						placeholder="Search by name, symbol, address"
 						value={searchPattern}
 						onChange={(e) => setSearchPattern(e.target.value)}
+						onKeyDown={(e) => e.key === 'Enter' && getSearchData()}
 						InputProps={{
 							endAdornment: (
 								<InputAdornment position="start">
@@ -258,11 +261,14 @@ function Row({ pool, index }: RowProps) {
 	const [open, setOpen] = React.useState(false)
 	const [openStakeDlg, setOpenStakeDlg] = useState(false)
 	const [openUnStakeDlg, setOpenUnStakeDlg] = useState(false)
-	const [pendingMilky, setPendingMilky] = useState(0.0)
+	const [rewardsMilky, setRewardsMilky] = useState(0.0)
+	const [totalRewards, setTotalRewards] = useState(0.0)
 	const [tvl, setTVL] = useState(0.0)
 	const [apr, setAPR] = useState(0.0)
 	const [rewards, setRewards] = useState(0.0)
 	const [loading, setLoading] = useState(false)
+	const [stakedUSD, setStakedUSD] = useState(0.0)
+	const [stakedAmount, setStakedAmount] = useState(0.0)
 
 	const connect = useCallback(async function () {
 		// This is the initial `provider` that is returned when
@@ -308,22 +314,25 @@ function Row({ pool, index }: RowProps) {
 		}
 	}
 
+	async function handleStakedBalance() {
+		const lpBalance = await getStakedBalance(pool.pid)
+		const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, pool.address)
+		setStakedUSD(usd)
+		setStakedAmount(lpBalance.balance)
+	}
+
 	async function handlePendingMilky(pid: number, lpAddr: string) {
-		setPendingMilky(await getPendingMilky(pid, lpAddr))
+		const pendingMilky = await getPendingMilky(pid, lpAddr)
+		setRewardsMilky(pendingMilky.rewards)
+		setTotalRewards(pendingMilky.instant + pendingMilky.locked * 3 / 4)
 	}
 
 	async function handleHarvest() {
 		setLoading(true)
 		await unstakeTokensFromPool(index, pool.address, '0');
-		setPendingMilky(0.0)
+		setRewardsMilky(0.0)
 		setLoading(false)
 	}
-
-	useEffect(() => {
-		if (appState.address !== '') {
-			handlePendingMilky(pool.pid, pool.address)
-		}
-	}, [appState.address])
 
 	async function handleGetPoolData(lpAddr: string) {
 		// setDataFetching(true)
@@ -333,11 +342,45 @@ function Row({ pool, index }: RowProps) {
 		// setDataFetching(false)
 	}
 
+	function useInterval(callback: any, delay: any) {
+		const savedCallback: any = useRef();
+
+		// Remember the latest function.
+		useEffect(() => {
+			savedCallback.current = callback;
+		}, [callback]);
+
+		// Set up the interval.
+		useEffect(() => {
+			function tick() {
+				savedCallback.current();
+			}
+			if (delay !== null) {
+				let id = setInterval(tick, delay);
+				return () => clearInterval(id);
+			}
+		}, [delay]);
+	}
+
 	useEffect(() => {
 		if (pool.address) {
 			handleGetPoolData(pool.address)
+			if (appState.address !== '') {
+				handlePendingMilky(pool.pid, pool.address)
+				handleStakedBalance()
+			}
 		}
-	})
+	}, [])
+
+	useInterval(() => {
+		if (pool.address) {
+			handleGetPoolData(pool.address)
+			if (appState.address !== '') {
+				handlePendingMilky(pool.pid, pool.address)
+				handleStakedBalance()
+			}
+		}
+	}, 60000);
 
 	const handleStakeOpen = (state: boolean): void => {
 		setOpenStakeDlg(state)
@@ -361,7 +404,6 @@ function Row({ pool, index }: RowProps) {
 				}}
 			>
 				<TableCell component="th" scope="row" sx={{ borderTopLeftRadius: '14px', borderBottomLeftRadius: '14px' }}>
-
 					<Stack direction="row" alignItems='center' spacing={3}>
 						<Box>
 							{
@@ -396,9 +438,13 @@ function Row({ pool, index }: RowProps) {
 						<Stack>
 							{
 								pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
-									<CustomTypography fontSize={16} fontWeight="700">Milky</CustomTypography>
+									<CustomTypography fontSize={16} fontWeight="700">{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
 								) : pool.tokenA && pool.tokenB && (
-									<CustomTypography fontSize={16} fontWeight="700">{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
+									<Link href={`/swap?tab=liquidity&pair1=${pool.tokenA}&pair2=${pool.tokenB}`}>
+										<CustomTypography fontSize={16} fontWeight="700">
+											{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}
+										</CustomTypography>
+									</Link>
 								)
 							}
 							<CustomTypography variant="body2" color="secondary" fontSize={12}>MilkySwap</CustomTypography>
@@ -441,31 +487,37 @@ function Row({ pool, index }: RowProps) {
 				<TableCell style={{ paddingBottom: 0, paddingTop: 0, borderRadius: '14px' }} colSpan={6}>
 					<Collapse in={open} timeout="auto" unmountOnExit>
 						<Grid container justifyContent="space-between" paddingTop={2} paddingBottom={2}>
-							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>
+							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={6}>
 								<Box>
 									<CustomTypography sx={{ color: '#fff' }}>
 										MILKY EARNED
 									</CustomTypography>
 								</Box>
 								<Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-									<CustomTypography sx={{ color: '#fff' }}>
-										{pendingMilky}
-									</CustomTypography>
-									<Button disabled={(pendingMilky > 0 && !loading) ? false : true} variant="contained" onClick={handleHarvest}>Harvest</Button>
+									<Stack flexDirection='column' width='100%'>
+										<Grid container padding={1}>
+											<Grid item xs={6}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													Rewards: {totalRewards}
+												</CustomTypography>
+											</Grid>
+										</Grid>
+									</Stack>
+									<Button disabled={(rewardsMilky > 0 && !loading) ? false : true} variant="contained" onClick={handleHarvest}>Harvest</Button>
 								</Box>
 							</Grid>
 							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>
 								<Stack direction="row" alignItems="center">
 									<CustomTypography sx={{ color: '#fff' }}>
-										Stake / Unstake
+										Staked {stakedAmount} (${stakedUSD.toFixed(2)})
 									</CustomTypography>
-									<CustomTypography paddingLeft={3}>
-										{
-											pool.tokenA && pool.tokenB && (
-												`${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label} / ${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}`
-											)
-										}
-									</CustomTypography>
+									{
+										pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
+											<CustomTypography paddingLeft={3}>{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
+										) : pool.tokenA && pool.tokenB && (
+											<CustomTypography paddingLeft={3}>{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
+										)
+									}
 								</Stack>
 								<Stack direction="row" alignItems="center">
 									{
@@ -482,8 +534,8 @@ function Row({ pool, index }: RowProps) {
 								{
 									pool.tokenA && pool.tokenB && (
 										<>
-											<CustomizedDialogs open={openStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.STAKE} pairType={`${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}`} handleOpen={handleStakeOpen} />
-											<CustomizedDialogs open={openUnStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.UNSTAKE} pairType={`${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}`} handleOpen={handleUnstakeOpen} />
+											<CustomizedDialogs open={openStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.STAKE} pairType={pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? `${TOKEN_DATA[TOKEN_TYPE.MILKY].label}` : `${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label} LP`} handleOpen={handleStakeOpen} />
+											<CustomizedDialogs open={openUnStakeDlg} pid={index} lpAddr={pool.address} type={TypeDialog.UNSTAKE} pairType={pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? `${TOKEN_DATA[TOKEN_TYPE.MILKY].label}` : `${TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}-${TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label} LP`} handleOpen={handleUnstakeOpen} />
 										</>
 									)
 								}

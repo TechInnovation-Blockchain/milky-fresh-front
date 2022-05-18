@@ -13,6 +13,8 @@ import { providers } from 'ethers'
 import { useAppContext } from 'context/WalletContext'
 import { setupProvider } from 'utils/integrate'
 import { ethers } from 'ethers'
+import { NetworkId } from 'config/constants/types'
+import toast from "react-hot-toast"
 
 const LinkStyle = styled(Link)(() => ({
 	color: 'white',
@@ -86,14 +88,13 @@ const Header = () => {
 		if (web3Modal.cachedProvider) {
 			connect()
 		}
-	}, [connect])
+	}, [])
 
 	useEffect(() => {
 		if (appState.provider?.on) {
 			const handleAccountsChanged = (accounts: string[]) => {
 				// eslint-disable-next-line no-console
-				console.log('accountsChanged', accounts)
-
+				setAppState({ ...appState, address: accounts[0] })
 			}
 
 			const handleDisconnect = (error: { code: number; message: string }) => {
@@ -105,7 +106,13 @@ const Header = () => {
 			provider.on('accountsChanged', handleAccountsChanged)
 			provider.on('disconnect', handleDisconnect)
 
-			setupProvider(appState)
+			if(appState.web3Provider && appState.web3Provider.network) {
+				if(appState.web3Provider.network.chainId !== NetworkId.BscTestnet) {
+					toast.error("You should select the right network.")
+				} else {
+					setupProvider(appState)
+				}
+			}
 
 			// Subscription Cleanup
 			return () => {
@@ -117,7 +124,7 @@ const Header = () => {
 		} else {
 			setupProvider(null)
 		}
-	}, [appState.provider, disconnect])
+	}, [appState.provider])
 
 	const handleMenuItemClick = (
 		event: React.MouseEvent<HTMLLIElement, MouseEvent>,
