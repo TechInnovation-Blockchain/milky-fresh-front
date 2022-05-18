@@ -262,7 +262,7 @@ function Row({ pool, index }: RowProps) {
 	const [openStakeDlg, setOpenStakeDlg] = useState(false)
 	const [openUnStakeDlg, setOpenUnStakeDlg] = useState(false)
 	const [rewardsMilky, setRewardsMilky] = useState(0.0)
-	const [totalRewards, setTotalRewards] = useState(0.0)
+	const [totalRewards, setTotalRewards] = useState({ instant: 0.0, locked: 0.0, unlocked: 0.0, total: 0.0 })
 	const [tvl, setTVL] = useState(0.0)
 	const [apr, setAPR] = useState(0.0)
 	const [rewards, setRewards] = useState(0.0)
@@ -324,7 +324,7 @@ function Row({ pool, index }: RowProps) {
 	async function handlePendingMilky(pid: number, lpAddr: string) {
 		const pendingMilky = await getPendingMilky(pid, lpAddr)
 		setRewardsMilky(pendingMilky.rewards)
-		setTotalRewards(pendingMilky.instant + pendingMilky.locked * 3 / 4)
+		setTotalRewards({ instant: pendingMilky.instant, locked: pendingMilky.locked, unlocked: pendingMilky.unlocked, total: pendingMilky.rewards })
 	}
 
 	async function handleHarvest() {
@@ -496,9 +496,14 @@ function Row({ pool, index }: RowProps) {
 								<Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 									<Stack flexDirection='column' width='100%'>
 										<Grid container padding={1}>
-											<Grid item xs={6}>
+											<Grid item xs={12}>
 												<CustomTypography sx={{ color: '#fff' }}>
-													Rewards: {totalRewards}
+													<b>Available:</b> {(totalRewards.instant + totalRewards.unlocked).toFixed(5)}
+												</CustomTypography>
+											</Grid>
+											<Grid item xs={12}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													<b>Locked:</b> {totalRewards.locked.toFixed(5)}
 												</CustomTypography>
 											</Grid>
 										</Grid>
