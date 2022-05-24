@@ -356,11 +356,11 @@ const Swap = () => {
 		// else {
 		// 	return ''
 		// }
-		if(name === TOKEN_TYPE.BNB) return TOKEN_TYPE.BNB
-		else if(name === TOKEN_TYPE.BUSD) return TOKEN_TYPE.BUSD
-		else if(name === TOKEN_TYPE.MILKY) return TOKEN_TYPE.MILKY
-		else if(name === TOKEN_TYPE.USDT) return TOKEN_TYPE.USDT
-		else if(name === TOKEN_TYPE.WSG) return TOKEN_TYPE.WSG
+		if (name === TOKEN_TYPE.BNB) return TOKEN_TYPE.BNB
+		else if (name === TOKEN_TYPE.BUSD) return TOKEN_TYPE.BUSD
+		else if (name === TOKEN_TYPE.MILKY) return TOKEN_TYPE.MILKY
+		else if (name === TOKEN_TYPE.USDT) return TOKEN_TYPE.USDT
+		else if (name === TOKEN_TYPE.WSG) return TOKEN_TYPE.WSG
 		else {
 			return ''
 		}
@@ -368,35 +368,35 @@ const Swap = () => {
 
 	const getCommonPattern = () => {
 		let isPair = false
-		for(let i = 0; i < TOKEN_PAIR.length; i ++) {
+		for (let i = 0; i < TOKEN_PAIR.length; i++) {
 			const pairItems = TOKEN_PAIR[i].value.split('/')
-			if((pairItems[0] === pairValue && pairItems[1] === secondPairValue) || (pairItems[0] === secondPairValue && pairItems[1] === pairValue)) {
+			if ((pairItems[0] === pairValue && pairItems[1] === secondPairValue) || (pairItems[0] === secondPairValue && pairItems[1] === pairValue)) {
 				isPair = true
 			}
 		}
 
-		if(isPair) {
+		if (isPair) {
 			return ''
 		} else {
 			let firstRelatedPatterns = [], secondRelatedPatterns = []
 			let commonPattern = ''
-			for(let i = 0; i < TOKEN_PAIR.length; i ++) {
+			for (let i = 0; i < TOKEN_PAIR.length; i++) {
 				let pattern = TOKEN_PAIR[i].value
-				if(TOKEN_PAIR[i].value.includes(pairValue as string)) {
+				if (TOKEN_PAIR[i].value.includes(pairValue as string)) {
 					pattern = pattern.replace(pairValue as string, '')
 					pattern = pattern.replace('/', '')
 					firstRelatedPatterns.push(pattern)
-				} 
-				if(TOKEN_PAIR[i].value.includes(secondPairValue as string)) {
+				}
+				if (TOKEN_PAIR[i].value.includes(secondPairValue as string)) {
 					pattern = pattern.replace(secondPairValue as string, '')
 					pattern = pattern.replace('/', '')
 					secondRelatedPatterns.push(pattern)
-				} 
+				}
 			}
 
-			for(let i = 0; i < firstRelatedPatterns.length; i ++) {
-				for(let j  = 0; j < secondRelatedPatterns.length; j ++) {
-					if(firstRelatedPatterns[i] === secondRelatedPatterns[j]) {
+			for (let i = 0; i < firstRelatedPatterns.length; i++) {
+				for (let j = 0; j < secondRelatedPatterns.length; j++) {
+					if (firstRelatedPatterns[i] === secondRelatedPatterns[j]) {
 						commonPattern = firstRelatedPatterns[i]
 						break;
 					}
@@ -410,7 +410,11 @@ const Swap = () => {
 	const handleSwap = async () => {
 		if (appState.address !== '' && pairValue !== 'default' && secondPairValue !== 'default') {
 			setWaiting(true)
-			await swapTokensToEth(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, parseFloat(slippage), parseFloat(deadline), getCommonPattern())
+			if (!arrow) {
+				await swapTokensToEth(pairValue as TOKEN_TYPE, secondPairValue as TOKEN_TYPE, amountTokenA, amountTokenB, appState.address as string, parseFloat(slippage), parseFloat(deadline), getCommonPattern())
+			} else {
+				await swapTokensToEth(secondPairValue as TOKEN_TYPE, pairValue as TOKEN_TYPE, amountTokenB, amountTokenA, appState.address as string, parseFloat(slippage), parseFloat(deadline), getCommonPattern())
+			}
 			setWaiting(false)
 		}
 	}
@@ -450,14 +454,13 @@ const Swap = () => {
 	}
 
 	async function handlePairRate(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE) {
-		const commonToken : TOKEN_TYPE | string = getCommonPattern()
-		if(commonToken === '') {
+		const commonToken: TOKEN_TYPE | string = getCommonPattern()
+		if (commonToken === '') {
 			setRate(await getRateFromPair(tokenA, tokenB))
 		} else {
 			const rate1 = await getRateFromPair(tokenA, commonToken as TOKEN_TYPE)
 			const rate2 = await getRateFromPair(tokenB, commonToken as TOKEN_TYPE)
-
-			setRate(rate1/rate2)
+			setRate(rate1 / rate2)
 		}
 	}
 

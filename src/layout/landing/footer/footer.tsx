@@ -88,7 +88,7 @@ const Footer = () => {
 
 const items1 = [
   {
-    title: "MilkyWay exchange AMM",
+    title: "MILKYWAY exchange AMM",
     url: "",
   },
   {

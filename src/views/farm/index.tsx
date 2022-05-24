@@ -25,7 +25,8 @@ import {
 	getCurrentPoolAPR,
 	getMilkyPair,
 	getStakedBalance,
-	getCurrentBalanceToUSD
+	getCurrentBalanceToUSD,
+	getCurrentMilkyPrice
 } from 'utils/integrate'
 
 import CustomizedDialogs from 'components/StakeDialog'
@@ -262,7 +263,7 @@ function Row({ pool, index }: RowProps) {
 	const [openStakeDlg, setOpenStakeDlg] = useState(false)
 	const [openUnStakeDlg, setOpenUnStakeDlg] = useState(false)
 	const [rewardsMilky, setRewardsMilky] = useState(0.0)
-	const [totalRewards, setTotalRewards] = useState({ instant: 0.0, locked: 0.0, unlocked: 0.0, total: 0.0 })
+	const [totalRewards, setTotalRewards] = useState(0.0)
 	const [tvl, setTVL] = useState(0.0)
 	const [apr, setAPR] = useState(0.0)
 	const [rewards, setRewards] = useState(0.0)
@@ -316,15 +317,21 @@ function Row({ pool, index }: RowProps) {
 
 	async function handleStakedBalance() {
 		const lpBalance = await getStakedBalance(pool.pid)
-		const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, pool.address)
-		setStakedUSD(usd)
 		setStakedAmount(lpBalance.balance)
+
+		if (pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
+			const usd = await getCurrentPoolTVL(pool.pid)
+			setStakedUSD(usd)
+		} else {
+			const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, pool.address)
+			setStakedUSD(usd)
+		}
 	}
 
 	async function handlePendingMilky(pid: number, lpAddr: string) {
 		const pendingMilky = await getPendingMilky(pid, lpAddr)
 		setRewardsMilky(pendingMilky.rewards)
-		setTotalRewards({ instant: pendingMilky.instant, locked: pendingMilky.locked, unlocked: pendingMilky.unlocked, total: pendingMilky.rewards })
+		setTotalRewards(pendingMilky.instant + pendingMilky.locked * 3 / 4)
 	}
 
 	async function handleHarvest() {
@@ -447,7 +454,7 @@ function Row({ pool, index }: RowProps) {
 									</Link>
 								)
 							}
-							<CustomTypography variant="body2" color="secondary" fontSize={12}>MilkySwap</CustomTypography>
+							<CustomTypography variant="body2" color="secondary" fontSize={12}>MILKYSWAP</CustomTypography>
 							<CustomTypography variant="body2" color="secondary" fontSize={12}>Farm</CustomTypography>
 						</Stack>
 					</Stack>
@@ -496,14 +503,9 @@ function Row({ pool, index }: RowProps) {
 								<Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 									<Stack flexDirection='column' width='100%'>
 										<Grid container padding={1}>
-											<Grid item xs={12}>
+											<Grid item xs={6}>
 												<CustomTypography sx={{ color: '#fff' }}>
-													<b>Available:</b> {(totalRewards.instant + totalRewards.unlocked).toFixed(5)}
-												</CustomTypography>
-											</Grid>
-											<Grid item xs={12}>
-												<CustomTypography sx={{ color: '#fff' }}>
-													<b>Locked:</b> {totalRewards.locked.toFixed(5)}
+													Rewards: {totalRewards.toFixed(2)}
 												</CustomTypography>
 											</Grid>
 										</Grid>

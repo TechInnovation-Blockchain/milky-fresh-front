@@ -597,6 +597,7 @@ export async function getCurrentMilkyPrice() {
 }
 
 export async function getCurrentBalanceToUSD(amount: number, lpAddr: string) {
+
     const lpContract = new ethers.Contract(
         lpAddr,
         MilkyPair.abi,
@@ -645,13 +646,14 @@ export async function getCurrentPoolTVL(pid: number) {
     const lpAddress = pool.lpToken as string
 
     if (lpAddress === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
-        let amount = 0
+        let amount = BigNumber.from(0)
 
         try {
-            amount = await contractMaster.userInfo(pid, getAddress())
+            const userInfo = await contractMaster.userInfo(pid, getAddress())
+            amount = userInfo[0]
         } catch { }
 
-        const price = (await getCurrentMilkyPrice()) * amount
+        const price = (await getCurrentMilkyPrice()) * formatDecimals(amount, 18)
 
         return parseFloat(price.toFixed(6))
     } else {
@@ -1166,7 +1168,7 @@ export async function getPoolBalance(token: string): Promise<any> {
 }
 
 export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amountIn: string, amountOutMin: string, address: string, slippage: number, deadline: number, commonPattern: TOKEN_TYPE | string) {
-    if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB] || commonPattern === '') return 0
+    if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB]) return 0
 
     const contractRouter = new ethers.Contract(
         MilkyRouter.address[getNetworkId()],
@@ -1176,7 +1178,7 @@ export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, am
 
     const decimalsA = await getDecimalFunc(tokenA)
 
-    const minimum = (parseFloat(amountIn) * (100 - slippage) / 100).toString()
+    const minimum = (parseFloat(amountOutMin) * (100 - slippage) / 100).toString()
 
     try {
         let tx = null
@@ -1219,6 +1221,7 @@ export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, am
                 CONTRACT_TABLE[tokenA].abi,
                 getSigner()
             )
+
             const allowance = formatDecimals(await lpContract.allowance(getAddress(), MilkyRouter.address[getNetworkId()]), await getDecimalToken(CONTRACT_TABLE[tokenA].address[getNetworkId()]))
             if (allowance < parseFloat(amountIn)) {
                 await approveToken(tokenA, ethers.constants.MaxUint256)
