@@ -30,7 +30,7 @@ import {
 } from 'utils/integrate'
 
 import CustomizedDialogs from 'components/StakeDialog'
-import { TypeDialog } from 'config/constants/types'
+import { NetworkId, TypeDialog } from 'config/constants/types'
 import { BlockNetworkId } from "config/constants/common"
 import { useAppContext } from 'context/WalletContext'
 
@@ -285,7 +285,9 @@ function Row({ pool, index }: RowProps) {
 		const address = await signer.getAddress()
 		const network = await web3Provider.getNetwork()
 
-		setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+		if (network.chainId === NetworkId.BscTestnet) {
+			setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+		}
 	}, [])
 
 	useEffect(() => {

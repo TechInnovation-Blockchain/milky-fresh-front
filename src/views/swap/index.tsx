@@ -17,6 +17,8 @@ import { BigNumber } from 'ethers';
 import SettingDialog from "components/SettingDialog"
 import { web3Modal } from 'utils/web3Modal'
 import { providers } from 'ethers'
+import { NetworkId } from 'config/constants/types'
+import toast from "react-hot-toast"
 
 const ToggleButtonStyle = styled(ToggleButton)(() => ({
 	padding: '10px 20px',
@@ -110,7 +112,11 @@ const Swap = () => {
 		const address = await signer.getAddress()
 		const network = await web3Provider.getNetwork()
 
-		setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+		if(network.chainId === NetworkId.BscTestnet) {
+			setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+		} else {
+			// toast.error("You should select the right network.")
+		}
 	}, [])
 
 	useEffect(() => {

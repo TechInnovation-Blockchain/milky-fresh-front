@@ -152,11 +152,19 @@ export function getNetworkId() {
 }
 
 export async function getAddress() {
-    return walletProvider ? (await walletProvider.getSigner().getAddress()).toString() : ''
+    try {
+        return walletProvider ? (await walletProvider.getSigner().getAddress()).toString() : ''
+    } catch (e) {
+        return ''
+    }
 }
 
 export async function getBalance() {
-    return walletProvider ? (await walletProvider.getBalance(await getAddress())).toString() : '0'
+    try {
+        return walletProvider ? (await walletProvider.getBalance(await getAddress())).toString() : '0'
+    } catch (e) {
+        return '0'
+    }
 }
 
 export function getSigner() {
