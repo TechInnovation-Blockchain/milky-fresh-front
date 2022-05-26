@@ -88,8 +88,6 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
 
     async function handleLpBalance(lpAddr: string) {
         const lpBalance = await getLPBalance(lpAddr)
-        const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, lpAddr)
-        setBalanceUSD(usd)
         setRealBalance(lpBalance.realBalance)
         setBalance(lpBalance.balance)
     }
@@ -177,9 +175,9 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
                                     <Typography fontWeight='bolder'>{type}</Typography>
                                     {
                                         type === 'UnStake' ? (
-                                            <Typography fontWeight='bolder'>Balance: {balance.toFixed(2)} (${balanceUSD.toFixed(2)})</Typography>
+                                            <Typography fontWeight='bolder'>Balance: {balance} (${balanceUSD.toFixed(2)})</Typography>
                                         ) : (
-                                            <Typography fontWeight='bolder'>Balance: {balance.toFixed(2)} (${balanceUSD.toFixed(2)})</Typography>
+                                            <Typography fontWeight='bolder'>Balance: {balance}</Typography>
                                         )
                                     }
                                 </Stack>

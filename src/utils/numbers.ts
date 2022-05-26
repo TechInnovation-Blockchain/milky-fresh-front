@@ -8,7 +8,7 @@ export function fCurrency(number: number) {
 }
 
 export function fPercent(number: number) {
-  return numeral(number / 100).format('0.00%');
+  return numeral(number / 100).format('0.0%');
 }
 
 export function fNumber(number: number) {

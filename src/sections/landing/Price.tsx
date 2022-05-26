@@ -29,7 +29,7 @@ const Price = () => {
 
   return (
     <section className={style.grid}>
-      <Item amount={price} desc="MILKYWAY Price" />
+      <Item amount={price} desc="MilkyWay Price" />
       <Item amount={totalValue} desc="Total Liquidity" />
       <Item amount="$112.5b" desc="Total Volume" />
       <Item amount={pairsLength.toString()} desc="Total Pairs" />

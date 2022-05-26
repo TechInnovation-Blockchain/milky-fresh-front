@@ -5,8 +5,6 @@ export enum NetworkId {
   Mainnet = 1,
 }
 
-export const NETWORK_ID = NetworkId.BscTestnet
-
 export type ContractAddress = {
   [key in NetworkId]: string
 }

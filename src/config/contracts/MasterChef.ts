@@ -2,7 +2,7 @@ import { NetworkId, ContractAddress, ContractInformation } from 'config/constant
 
 const MasterChef: ContractInformation = {
     address: {
-        [NetworkId.BscTestnet]: '0xa64F27cF413464A9579B30784C99f6a5F52bb62A'
+        [NetworkId.BscTestnet]: '0x4F664Eb09a99be79FB77948259447574a7c139fc'
     } as ContractAddress,
     abi: [
         {
@@ -209,19 +209,6 @@ const MasterChef: ContractInformation = {
           "inputs": [
             {
               "internalType": "uint256",
-              "name": "_pid",
-              "type": "uint256"
-            }
-          ],
-          "name": "emergencyWithdraw",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "uint256",
               "name": "_from",
               "type": "uint256"
             },
@@ -237,19 +224,6 @@ const MasterChef: ContractInformation = {
               "internalType": "uint256",
               "name": "",
               "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "isPaused",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
             }
           ],
           "stateMutability": "view",
@@ -362,11 +336,6 @@ const MasterChef: ContractInformation = {
             },
             {
               "internalType": "uint256",
-              "name": "totalDeposited",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
               "name": "lastRewardBlock",
               "type": "uint256"
             },
@@ -418,19 +387,6 @@ const MasterChef: ContractInformation = {
             }
           ],
           "name": "set",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "bool",
-              "name": "paused",
-              "type": "bool"
-            }
-          ],
-          "name": "setPaused",
           "outputs": [],
           "stateMutability": "nonpayable",
           "type": "function"

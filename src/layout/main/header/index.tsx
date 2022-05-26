@@ -7,13 +7,13 @@ import { styled } from '@mui/material/styles'
 import { MoreHoriz as MoreIcon } from '@mui/icons-material'
 import useResponsive from 'hooks/useResponsive'
 import Logo from 'components/Logo'
-import { useCallback } from 'react'
-import { web3Modal } from 'utils/web3Modal'
+import { useCallback, useReducer } from 'react'
+import { reducer, initialState, web3Modal } from 'utils/web3Modal'
 import { providers } from 'ethers'
 import { useAppContext } from 'context/WalletContext'
 import { setupProvider } from 'utils/integrate'
 import { ethers } from 'ethers'
-import { NetworkId, NETWORK_ID } from 'config/constants/types'
+import { NetworkId } from 'config/constants/types'
 import toast from "react-hot-toast"
 
 const LinkStyle = styled(Link)(() => ({
@@ -38,7 +38,7 @@ const options = [
 
 const Header = () => {
 	const [appState, setAppState] = useAppContext()
-	const { provider, address } = appState
+	const { provider, web3Provider, address, chainId } = appState
 
 	const isMobile = useResponsive('between', 'sm', 1, 680);
 	const [open, setOpen] = useState(false);
@@ -53,18 +53,21 @@ const Header = () => {
 	}
 
 	const connect = useCallback(async function () {
-		try {
-			const provider = await web3Modal.connect()
-			const web3Provider = new providers.Web3Provider(provider)
+		// This is the initial `provider` that is returned when
+		// using web3Modal to connect. Can be MetaMask or WalletConnect.
+		const provider = await web3Modal.connect()
 
-			const signer = web3Provider.getSigner()
-			const address = await signer.getAddress()
-			const network = await web3Provider.getNetwork()
+		// We plug the initial `provider` into ethers.js and get back
+		// a Web3Provider. This will add on methods from ethers.js and
+		// event listeners such as `.on()` will be different.
+		const web3Provider = new providers.Web3Provider(provider)
 
-			setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
-		} catch (e) {
-			
-		}
+		const signer = web3Provider.getSigner()
+		const address = await signer.getAddress()
+		const network = await web3Provider.getNetwork()
+
+		setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+
 	}, [])
 
 	const disconnect = useCallback(
@@ -74,14 +77,11 @@ const Header = () => {
 				await provider.disconnect()
 			}
 
-			setAppState({ provider: null, web3Provider: null, address: '', chainId: -1 })
-		},
-		[]
-	)
+			setAppState({ ...appState, provider: null, web3Provider: null, address: '', chainId: -1 })
 
-	if (address === undefined) {
-		disconnect()
-	}
+		},
+		[provider]
+	)
 
 	// Auto connect to the cached provider
 	useEffect(() => {
@@ -99,24 +99,15 @@ const Header = () => {
 
 			const handleDisconnect = (error: { code: number; message: string }) => {
 				// eslint-disable-next-line no-console
-				console.log('disconnect', error.code, error.message)
-				if (error.code !== 1013) {
-					disconnect()
-				}
-			}
-
-			const handleChainChanged = (chainId: number) => {
-				if ((parseInt(chainId.toString()) as NetworkId) !== NETWORK_ID) {
-					toast.error("You should select the right network.")
-				}
+				console.log('disconnect', error)
+				disconnect()
 			}
 
 			provider.on('accountsChanged', handleAccountsChanged)
 			provider.on('disconnect', handleDisconnect)
-			provider.on('chainChanged', handleChainChanged)
 
-			if (appState.web3Provider && appState.web3Provider.network) {
-				if (appState.web3Provider.network.chainId !== NetworkId.BscTestnet) {
+			if(appState.web3Provider && appState.web3Provider.network) {
+				if(appState.web3Provider.network.chainId !== NetworkId.BscTestnet) {
 					toast.error("You should select the right network.")
 				} else {
 					setupProvider(appState)
@@ -128,7 +119,6 @@ const Header = () => {
 				if (provider.removeListener) {
 					provider.removeListener('accountsChanged', handleAccountsChanged)
 					provider.removeListener('disconnect', handleDisconnect)
-					provider.removeListener('chainChanged', handleChainChanged)
 				}
 			}
 		} else {
@@ -186,7 +176,7 @@ const Header = () => {
 			{
 				!isMobile && (
 					<Stack direction="row" spacing={1.5} alignItems="center">
-						<ButtonStyle variant='contained' onClick={appState.web3Provider ? disconnect : connect}>{appState.web3Provider && address ? getSubAddress(address as string) : 'Connect Wallet'}</ButtonStyle>
+						<ButtonStyle variant='contained' onClick={appState.web3Provider ? disconnect : connect}>{appState.web3Provider ? getSubAddress(address as string) : 'Connect Wallet'}</ButtonStyle>
 					</Stack>
 				)
 			}
