@@ -7,7 +7,6 @@ const Exchange = () => {
   return (
     <section className={style.section2}>
       <div className={style.heading}>
-        <h1>MILKYWAY</h1>
         <h1>Exchange Properties</h1>
       </div>
 
@@ -23,8 +22,9 @@ const Exchange = () => {
           style={{
             background: "transparent",
             position: "absolute",
-            top: "24rem",
-            left: "-5.5rem",
+            top: "26rem",
+            left: "-7.5rem",
+            border: "unset"
           }}
         >
           <img src={smallLogo} alt="smallLogo" />

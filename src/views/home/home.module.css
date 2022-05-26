@@ -1,11 +1,8 @@
 :root {
   --whiteColor: white;
-  --btnColor: linear-gradient(
-    101deg,
-    rgba(195, 179, 34, 1) 0%,
-    rgba(253, 61, 45, 0.9560866582961309) 100%
-  );
+  --btnColor: linear-gradient(101deg, rgba(195, 179, 34, 1) 0%, rgba(253, 61, 45, 0.9560866582961309) 100%);
   --btnPurple: #421c52;
+  --btnColor2: linear-gradient(101deg, rgb(223, 105, 225) 0%, rgb(140, 1, 183) 100%);
 }
 
 .wrapper {
@@ -75,7 +72,6 @@ h4:after {
   text-align: center;
   color: var(--whiteColor);
   font-size: 16px;
-  font-weight: lighter;
   font-family: Open Sans;
 }
 
@@ -113,6 +109,10 @@ a {
   background: var(--btnPurple);
 }
 
+button {
+  transition: all 0.5s ease;
+}
+
 .grid {
   max-width: 100%;
   display: flex;
@@ -133,7 +133,8 @@ a {
   margin-left: 24px;
   align-items: center;
   border-radius: 50%;
-  background-image: linear-gradient(to bottom, #360C47, #261F4B);
+  background-image: linear-gradient(to bottom, #360c47, #261f4b);
+  border: #8a25a3 2px solid;
 }
 
 .item h3 {
@@ -143,7 +144,7 @@ a {
   /* color: blueviolet; */
   color: #b31ab3;
   font-weight: normal;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .section2 {
@@ -156,6 +157,7 @@ a {
 
 .heading {
   text-align: center;
+  margin-top: 50px;
 }
 
 .heading h1 {
@@ -203,8 +205,9 @@ a {
   margin: 10px;
   align-items: center;
   border-radius: 50%;
-  background-image: linear-gradient(to bottom, #360C47, #1C1946);
+  background-image: linear-gradient(to bottom, #360c47, #1c1946);
   position: relative;
+  border: #8a25a3 2px solid;
 }
 
 @media screen and (max-width: 750px) {
@@ -268,7 +271,7 @@ a {
   justify-content: space-around;
   align-items: center;
   position: relative;
-  /* padding: 50px; */
+  margin-top: 56px;
   padding: 10px;
   flex-wrap: wrap;
 }
@@ -291,8 +294,9 @@ a {
   margin-left: 20px;
   align-items: center;
   border-radius: 50%;
-  background-image: linear-gradient(to bottom, #360C47, #1C1946);
+  background-image: linear-gradient(to bottom, #360c47, #1c1946);
   position: relative;
+  border: #8a25a3 2px solid;
 }
 
 .grid3__item span {
@@ -307,7 +311,8 @@ a {
   justify-content: space-around;
   align-items: center;
   position: relative;
-  /* padding: 50px; */
+  margin-top: 56px;
+  margin-bottom: 50px;
   padding: 10px;
   flex-wrap: wrap;
 }

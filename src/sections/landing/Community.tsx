@@ -6,12 +6,10 @@ const Community = () => {
   return (
     <section className={style.section3}>
       <div className={style.heading}>
-        <h1>MILKYWAY's</h1>
-        <h1>evolving community</h1>
+        <h1>Evolving community</h1>
       </div>
       <div className={style.grid3}>
         <Item3 icon={"icon1"} value="20+" desc="Wallets Supported" />
-        <Item3 icon={"icon2"} value="14" desc="Chains Supported" />
         <Item3 icon={"icon3"} value="25k+" desc="Discord Members" />
         <Item3 icon={"icon4"} value="150k+" desc="MILKY Holders" />
       </div>
