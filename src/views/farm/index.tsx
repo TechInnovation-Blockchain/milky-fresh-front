@@ -136,7 +136,7 @@ interface FarmBoxProps {
 const FarmBox = ({ text, type, point, farmClicked }: FarmBoxProps) => {
 	const background = type === false ? '#2b0e79' : 'var(--btnColor2)';
 	const [loading, setLoading] = useState(false)
-	const points = [2000, 1000, 500, 100];
+	const points = [0];
 	const click = () => {
 		farmClicked(point);
 	}
@@ -161,7 +161,7 @@ interface poolInterface {
 const Farm = () => {
 	const isDesktop = useResponsive('up', 'md');
 	const [poolData, setPoolData] = useState<any>([])
-	const [point, setPoint] = useState<number>(2000);
+	const [point, setPoint] = useState<number>(1000);
 	const [loading, setLoading] = useState(false)
 	const [searchPattern, setSearchPattern] = useState('')
 
@@ -201,14 +201,7 @@ const Farm = () => {
 					<FarmBox text="Your Farm" type={false} point={-1} farmClicked={farmClicked} />
 					<Divider sx={{ my: 1, bgcolor: "#dd38f2 !important" }} />
 					<Stack spacing={1.5}>
-						{
-							[2000].map((pt, index) => (
-								point === pt ?
-									<FarmBox key={index} text={`General`} type={true} point={pt} farmClicked={farmClicked} />
-									:
-									<FarmBox key={index} text={`General`} type={false} point={pt} farmClicked={farmClicked} />
-							))
-						}
+						<FarmBox key={1} text={`General`} type={true} point={0} farmClicked={farmClicked} />
 					</Stack>
 				</Stack>
 				<Box sx={{ flexGrow: 1 }}>
@@ -460,7 +453,7 @@ function Row({ pool, index }: RowProps) {
 								pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
 									<span style={{ display: ' flex', fontWeight: "700" }}>
 										{TOKEN_DATA[TOKEN_TYPE.MILKY].label}
-										<Link style={{ textDecoration: 'none', color: 'white', cursor: 'pointer' }} href={`/swap?tab=swap&pair2=${TOKEN_DATA[TOKEN_TYPE.MILKY].label.toLowerCase()}`}>
+										<Link style={{ textDecoration: 'none', color: 'white', cursor: 'pointer' }} onClick={(e) => {e.stopPropagation()}} target="_blank" href={`/swap?tab=swap&pair2=${TOKEN_DATA[TOKEN_TYPE.MILKY].label.toLowerCase()}`}>
 											<CustomTypography fontSize={16} fontWeight="700">
 												<svg style={{ fill: "white", marginLeft: '6px', position: 'relative' }} viewBox="0 0 24 24" color="primary" width="20px" xmlns="http://www.w3.org/2000/svg">
 													<path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z">
@@ -472,7 +465,7 @@ function Row({ pool, index }: RowProps) {
 								) : pool.tokenA && pool.tokenB && (
 									<span style={{ display: ' flex', fontWeight: "700" }}>
 										{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}
-										<Link style={{ textDecoration: 'none', color: 'white', cursor: 'pointer' }} href={`/swap?tab=liquidity&pair1=${pool.tokenA}&pair2=${pool.tokenB}`}>
+										<Link style={{ textDecoration: 'none', color: 'white', cursor: 'pointer' }} onClick={(e) => {e.stopPropagation()}} target="_blank" href={`/swap?tab=liquidity&pair1=${pool.tokenA}&pair2=${pool.tokenB}`}>
 											<CustomTypography fontSize={16} fontWeight="700">
 												<svg style={{ fill: "white", marginLeft: '6px', position: 'relative' }} viewBox="0 0 24 24" color="primary" width="20px" xmlns="http://www.w3.org/2000/svg">
 													<path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z">
@@ -501,7 +494,7 @@ function Row({ pool, index }: RowProps) {
 							/>
 						</Box>
 						<CustomTypography fontSize={12}>
-							{rewards.toFixed(1)} TOKEN / DAY
+							{rewards.toFixed(0)} MILKY / DAY
 						</CustomTypography>
 					</Stack>
 				</TableCell>
@@ -550,15 +543,20 @@ function Row({ pool, index }: RowProps) {
 							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>
 								<Stack direction="row" alignItems="center">
 									<CustomTypography sx={{ color: '#fff' }}>
-										Staked {stakedAmount} (${stakedUSD.toFixed(2)})
+										Staked: {stakedAmount.toFixed(2)} 
 									</CustomTypography>
 									{
 										pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
-											<CustomTypography paddingLeft={3}>{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
+											<CustomTypography paddingLeft={1}>{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
 										) : pool.tokenA && pool.tokenB && (
-											<CustomTypography paddingLeft={3}>{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
+											<CustomTypography paddingLeft={1}>{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
 										)
 									}
+								</Stack>
+								<Stack direction="row" alignItems="center">
+									<CustomTypography sx={{ color: '#fff' }}>
+										USD Value: (${stakedUSD.toFixed(2)})
+									</CustomTypography>
 								</Stack>
 								<Stack direction="row" alignItems="center">
 									{

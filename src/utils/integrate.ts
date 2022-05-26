@@ -621,10 +621,18 @@ export async function getCurrentBalanceToUSD(amount: number, lpAddr: string) {
     const totalSupply = formatDecimals(await lpContract.totalSupply(), await getDecimalToken(lpAddr))
 
     const data = await getPairDataFromLpAddr(lpAddr)
-    let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE)
-    let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE)
 
-    return amount * reserve0Float * tokenAPrice / totalSupply + amount * reserve1Float * tokenBPrice / totalSupply
+    if (data.tokenA == TOKEN_TYPE.BNB || data.tokenA == TOKEN_TYPE.BUSD) {
+        let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE);
+        return 2 * amount * reserve0Float * tokenAPrice / totalSupply;
+    }
+
+    if (data.tokenB == TOKEN_TYPE.BNB || data.tokenB == TOKEN_TYPE.BUSD) {
+        let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE);
+        return 2 * amount * reserve1Float * tokenBPrice / totalSupply
+    }
+
+    return 0;
 }
 
 export async function getCurrentPoolTVL(pid: number) {
@@ -657,8 +665,7 @@ export async function getCurrentPoolTVL(pid: number) {
         let amount = BigNumber.from(0)
 
         try {
-            const userInfo = await contractMaster.userInfo(pid, getAddress())
-            amount = userInfo[0]
+            amount = pool.totalDeposited;
         } catch { }
 
         const price = (await getCurrentMilkyPrice()) * formatDecimals(amount, 18)
@@ -673,9 +680,10 @@ export async function getCurrentPoolTVL(pid: number) {
 
         const data = await getPairDataFromLpAddr(lpAddress)
         const { _reserve0, _reserve1 } = await contractLp.getReserves()
+        const decimals = await getDecimalToken(lpAddress);
 
-        const reserve0Float = formatDecimals(_reserve0, await getDecimalToken(lpAddress))
-        const reserve1Float = formatDecimals(_reserve1, await getDecimalToken(lpAddress))
+        const reserve0Float = formatDecimals(_reserve0, decimals)
+        const reserve1Float = formatDecimals(_reserve1, decimals)
 
         let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE)
         let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE)
@@ -690,7 +698,18 @@ export async function getCurrentPoolTVL(pid: number) {
         }
 
         const liquidityTvl = tokenAValue + tokenBValue
-        return parseFloat((liquidityTvl * (pool.allocPoint as BigNumber).toNumber() / totalAllocPoint.toNumber()).toFixed(6))
+
+        let amount = 0;
+
+        try {
+            const totalLp = await contractLp.totalSupply()
+            const poolLp = await pool.totalDeposited;
+
+            const percentage = poolLp / totalLp;
+            amount = percentage * liquidityTvl;
+        } catch { }
+
+        return parseFloat(amount.toFixed(6))
     }
 }
 
@@ -772,27 +791,25 @@ export async function getPoolDataFromPoint(point: number): Promise<any> {
 
     for (let i = 0; i < poolLength; i++) {
         const pool = await contract.poolInfo(i)
-        if (BigNumber.from(pool.allocPoint).toNumber() === point) {
-            if (pool.lpToken === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
-                poolDataList.push({
-                    address: pool.lpToken,
-                    tokenA: TOKEN_TYPE.MILKY,
-                    tokenB: TOKEN_TYPE.MILKY,
-                    allocPoint: pool.allocPoint,
-                    lastRewardBlock: pool.lastRewardBlock,
-                    pid: i,
-                })
-            } else {
-                const pairData = await getPairDataFromLpAddr(pool.lpToken)
-                poolDataList.push({
-                    address: pool.lpToken,
-                    tokenA: pairData.tokenA,
-                    tokenB: pairData.tokenB,
-                    allocPoint: pool.allocPoint,
-                    lastRewardBlock: pool.lastRewardBlock,
-                    pid: i,
-                })
-            }
+        if (pool.lpToken === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
+            poolDataList.push({
+                address: pool.lpToken,
+                tokenA: TOKEN_TYPE.MILKY,
+                tokenB: TOKEN_TYPE.MILKY,
+                allocPoint: pool.allocPoint,
+                lastRewardBlock: pool.lastRewardBlock,
+                pid: i,
+            })
+        } else {
+            const pairData = await getPairDataFromLpAddr(pool.lpToken)
+            poolDataList.push({
+                address: pool.lpToken,
+                tokenA: pairData.tokenA,
+                tokenB: pairData.tokenB,
+                allocPoint: pool.allocPoint,
+                lastRewardBlock: pool.lastRewardBlock,
+                pid: i,
+            })
         }
     }
 
