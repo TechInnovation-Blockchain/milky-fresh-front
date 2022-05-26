@@ -8,13 +8,13 @@ import Home from "views/home";
 import Swap from "views/swap";
 import Farm from "views/farm";
 
-import Test from 'components/Test';
+import ComingSoon from 'views/ComingSoon';
 
 // ----------------------------------------------------------------------
 
 export default function Router() {
   return useRoutes(
-    process.env.REACT_APP_PRODUCTION !== 'DEV' ? [
+    process.env.REACT_APP_RELEASE !== 'false' ? [
       {
         path: '/',
         element: <LandingLayout />,
@@ -39,7 +39,7 @@ export default function Router() {
     ] : [
       {
         path: '/',
-        element: <Test/>
+        element: <ComingSoon/>
       }
     ]
   );
