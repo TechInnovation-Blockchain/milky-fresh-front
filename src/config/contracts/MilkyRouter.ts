@@ -2,7 +2,7 @@ import { NetworkId, ContractAddress, ContractInformation } from 'config/constant
 
 const MilkyRouter: ContractInformation = {
     address: {
-        [NetworkId.BscTestnet]: '0x16F993EdFB1BcAA25A638D98f0d077D2A7F98cAF',
+        [NetworkId.BscTestnet]: '0xA5E9C5b582F5fcEAE1f9814302b47Cb150d3dfA2',
     } as ContractAddress,
     abi: [
         {

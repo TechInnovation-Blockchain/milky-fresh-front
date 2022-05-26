@@ -152,11 +152,19 @@ export function getNetworkId() {
 }
 
 export async function getAddress() {
-    return walletProvider ? (await walletProvider.getSigner().getAddress()).toString() : ''
+    try {
+        return walletProvider ? (await walletProvider.getSigner().getAddress()).toString() : ''
+    } catch (e) {
+        return ''
+    }
 }
 
 export async function getBalance() {
-    return walletProvider ? (await walletProvider.getBalance(await getAddress())).toString() : '0'
+    try {
+        return walletProvider ? (await walletProvider.getBalance(await getAddress())).toString() : '0'
+    } catch (e) {
+        return '0'
+    }
 }
 
 export function getSigner() {
@@ -336,11 +344,15 @@ export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): P
     const address0 = CONTRACT_TABLE[tokenA].address[getNetworkId()]
     const address1 = CONTRACT_TABLE[tokenB].address[getNetworkId()]
 
+    const decimals0 = await getDecimalToken(address0);
+    const decimals1 = await getDecimalToken(address1);
+
     const pairAddress = await getPairAddress(tokenA, tokenB) as string
 
     if (pairAddress === ZERO_ADDRESS) {
         return 0
     }
+
     const pairContract = new ethers.Contract(
         pairAddress,
         MilkyPair.abi,
@@ -363,9 +375,9 @@ export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): P
     } else {
         let result = 0
         if (address0 === token0) {
-            result = formatDecimals(_reserve0, await getDecimalToken(address0)) / formatDecimals(_reserve1, await getDecimalToken(address1))
+            result = formatDecimals(_reserve0, decimals0) / formatDecimals(_reserve1, decimals1)
         } else {
-            result = formatDecimals(_reserve1, await getDecimalToken(address1)) / formatDecimals(_reserve0, await getDecimalToken(address0))
+            result = formatDecimals(_reserve1, decimals1) / formatDecimals(_reserve0, decimals0)
         }
         return result
     }
@@ -393,10 +405,10 @@ export async function approve(address: string, to: string, amount: string | BigN
             case 4001:
                 break
             case "INSUFFICIENT_FUNDS":
-                toast.error("Insufficient fund in your wallet.")
+                toast.error("Insufficient funds in your wallet.")
                 break
             default:
-                toast.error("Token approved failed.")
+                toast.error("Token approve failed.")
                 break
         }
     }
@@ -597,6 +609,7 @@ export async function getCurrentMilkyPrice() {
 }
 
 export async function getCurrentBalanceToUSD(amount: number, lpAddr: string) {
+
     const lpContract = new ethers.Contract(
         lpAddr,
         MilkyPair.abi,
@@ -612,10 +625,18 @@ export async function getCurrentBalanceToUSD(amount: number, lpAddr: string) {
     const totalSupply = formatDecimals(await lpContract.totalSupply(), await getDecimalToken(lpAddr))
 
     const data = await getPairDataFromLpAddr(lpAddr)
-    let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE)
-    let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE)
 
-    return amount * reserve0Float * tokenAPrice / totalSupply + amount * reserve1Float * tokenBPrice / totalSupply
+    if (data.tokenA == TOKEN_TYPE.BNB || data.tokenA == TOKEN_TYPE.BUSD) {
+        let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE);
+        return 2 * amount * reserve0Float * tokenAPrice / totalSupply;
+    }
+
+    if (data.tokenB == TOKEN_TYPE.BNB || data.tokenB == TOKEN_TYPE.BUSD) {
+        let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE);
+        return 2 * amount * reserve1Float * tokenBPrice / totalSupply
+    }
+
+    return 0;
 }
 
 export async function getCurrentPoolTVL(pid: number) {
@@ -645,13 +666,13 @@ export async function getCurrentPoolTVL(pid: number) {
     const lpAddress = pool.lpToken as string
 
     if (lpAddress === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
-        let amount = 0
+        let amount = BigNumber.from(0)
 
         try {
-            amount = await contractMaster.userInfo(pid, getAddress())
+            amount = pool.totalDeposited;
         } catch { }
 
-        const price = (await getCurrentMilkyPrice()) * amount
+        const price = (await getCurrentMilkyPrice()) * formatDecimals(amount, 18)
 
         return parseFloat(price.toFixed(6))
     } else {
@@ -663,9 +684,10 @@ export async function getCurrentPoolTVL(pid: number) {
 
         const data = await getPairDataFromLpAddr(lpAddress)
         const { _reserve0, _reserve1 } = await contractLp.getReserves()
+        const decimals = await getDecimalToken(lpAddress);
 
-        const reserve0Float = formatDecimals(_reserve0, await getDecimalToken(lpAddress))
-        const reserve1Float = formatDecimals(_reserve1, await getDecimalToken(lpAddress))
+        const reserve0Float = formatDecimals(_reserve0, decimals)
+        const reserve1Float = formatDecimals(_reserve1, decimals)
 
         let tokenAPrice = await getTokenPrice(data.tokenA as TOKEN_TYPE)
         let tokenBPrice = await getTokenPrice(data.tokenB as TOKEN_TYPE)
@@ -680,7 +702,18 @@ export async function getCurrentPoolTVL(pid: number) {
         }
 
         const liquidityTvl = tokenAValue + tokenBValue
-        return parseFloat((liquidityTvl * (pool.allocPoint as BigNumber).toNumber() / totalAllocPoint.toNumber()).toFixed(6))
+
+        let amount = 0;
+
+        try {
+            const totalLp = await contractLp.totalSupply()
+            const poolLp = await pool.totalDeposited;
+
+            const percentage = poolLp / totalLp;
+            amount = percentage * liquidityTvl;
+        } catch { }
+
+        return parseFloat(amount.toFixed(6))
     }
 }
 
@@ -762,27 +795,25 @@ export async function getPoolDataFromPoint(point: number): Promise<any> {
 
     for (let i = 0; i < poolLength; i++) {
         const pool = await contract.poolInfo(i)
-        if (BigNumber.from(pool.allocPoint).toNumber() === point) {
-            if (pool.lpToken === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
-                poolDataList.push({
-                    address: pool.lpToken,
-                    tokenA: TOKEN_TYPE.MILKY,
-                    tokenB: TOKEN_TYPE.MILKY,
-                    allocPoint: pool.allocPoint,
-                    lastRewardBlock: pool.lastRewardBlock,
-                    pid: i,
-                })
-            } else {
-                const pairData = await getPairDataFromLpAddr(pool.lpToken)
-                poolDataList.push({
-                    address: pool.lpToken,
-                    tokenA: pairData.tokenA,
-                    tokenB: pairData.tokenB,
-                    allocPoint: pool.allocPoint,
-                    lastRewardBlock: pool.lastRewardBlock,
-                    pid: i,
-                })
-            }
+        if (pool.lpToken === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
+            poolDataList.push({
+                address: pool.lpToken,
+                tokenA: TOKEN_TYPE.MILKY,
+                tokenB: TOKEN_TYPE.MILKY,
+                allocPoint: pool.allocPoint,
+                lastRewardBlock: pool.lastRewardBlock,
+                pid: i,
+            })
+        } else {
+            const pairData = await getPairDataFromLpAddr(pool.lpToken)
+            poolDataList.push({
+                address: pool.lpToken,
+                tokenA: pairData.tokenA,
+                tokenB: pairData.tokenB,
+                allocPoint: pool.allocPoint,
+                lastRewardBlock: pool.lastRewardBlock,
+                pid: i,
+            })
         }
     }
 
@@ -1071,7 +1102,7 @@ export async function unstakeTokensFromPool(pid: number, address: string, amount
         const events = receipt.events
         if (events && events.length > 0) {
             if (amountBigNumber.isZero()) {
-                toast.success(" Successfully harvested rewards!")
+                toast.success("Successfully harvested rewards!")
             } else {
                 toast.success("Successfully unstake LP tokens!")
             }
@@ -1166,7 +1197,7 @@ export async function getPoolBalance(token: string): Promise<any> {
 }
 
 export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amountIn: string, amountOutMin: string, address: string, slippage: number, deadline: number, commonPattern: TOKEN_TYPE | string) {
-    if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB] || commonPattern === '') return 0
+    if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB]) return 0
 
     const contractRouter = new ethers.Contract(
         MilkyRouter.address[getNetworkId()],
@@ -1176,7 +1207,7 @@ export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, am
 
     const decimalsA = await getDecimalFunc(tokenA)
 
-    const minimum = (parseFloat(amountIn) * (100 - slippage) / 100).toString()
+    const minimum = (parseFloat(amountOutMin) * (100 - slippage) / 100).toString()
 
     try {
         let tx = null
@@ -1219,6 +1250,7 @@ export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, am
                 CONTRACT_TABLE[tokenA].abi,
                 getSigner()
             )
+
             const allowance = formatDecimals(await lpContract.allowance(getAddress(), MilkyRouter.address[getNetworkId()]), await getDecimalToken(CONTRACT_TABLE[tokenA].address[getNetworkId()]))
             if (allowance < parseFloat(amountIn)) {
                 await approveToken(tokenA, ethers.constants.MaxUint256)

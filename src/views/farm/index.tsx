@@ -25,13 +25,25 @@ import {
 	getCurrentPoolAPR,
 	getMilkyPair,
 	getStakedBalance,
-	getCurrentBalanceToUSD
+	getCurrentBalanceToUSD,
+	getCurrentMilkyPrice
 } from 'utils/integrate'
 
 import CustomizedDialogs from 'components/StakeDialog'
-import { TypeDialog } from 'config/constants/types'
+import { NetworkId, TypeDialog } from 'config/constants/types'
 import { BlockNetworkId } from "config/constants/common"
 import { useAppContext } from 'context/WalletContext'
+
+const FarmButtonStyle = styled(Button)(() => ({
+	padding: '10px 20px',
+	color: '#FFFFFF',
+	borderRadius: '14px !important',
+	background: 'var(--btnColor2)',
+	border: 'none',
+	textTransform: 'capitalize',
+	marginTop:"20px"
+}));
+
 
 const InputStyle = styled(TextField)(() => ({
 	padding: '0px 20px',
@@ -122,15 +134,15 @@ interface FarmBoxProps {
 
 
 const FarmBox = ({ text, type, point, farmClicked }: FarmBoxProps) => {
-	const backgroundColor = type === false ? '#2b0e79' : '#DD38F2';
+	const background = type === false ? '#2b0e79' : 'var(--btnColor2)';
 	const [loading, setLoading] = useState(false)
-	const points = [2000, 1000, 500, 100];
+	const points = [0];
 	const click = () => {
 		farmClicked(point);
 	}
 
 	return (
-		<CustomFarmBox sx={{ backgroundColor }} onClick={() => click()}>
+		<CustomFarmBox sx={{ background }} onClick={() => click()}>
 			<Stack direction='row' alignItems='center' justifyContent='space-between'>
 				<CustomTypography>{text}</CustomTypography>
 			</Stack>
@@ -149,7 +161,7 @@ interface poolInterface {
 const Farm = () => {
 	const isDesktop = useResponsive('up', 'md');
 	const [poolData, setPoolData] = useState<any>([])
-	const [point, setPoint] = useState<number>(2000);
+	const [point, setPoint] = useState<number>(1000);
 	const [loading, setLoading] = useState(false)
 	const [searchPattern, setSearchPattern] = useState('')
 
@@ -189,14 +201,7 @@ const Farm = () => {
 					<FarmBox text="Your Farm" type={false} point={-1} farmClicked={farmClicked} />
 					<Divider sx={{ my: 1, bgcolor: "#dd38f2 !important" }} />
 					<Stack spacing={1.5}>
-						{
-							[2000, 1000, 500, 100].map((pt, index) => (
-								point === pt ?
-									<FarmBox key={index} text={`Core${index + 1}`} type={true} point={pt} farmClicked={farmClicked} />
-									:
-									<FarmBox key={index} text={`Core${index + 1}`} type={false} point={pt} farmClicked={farmClicked} />
-							))
-						}
+						<FarmBox key={1} text={`General`} type={true} point={0} farmClicked={farmClicked} />
 					</Stack>
 				</Stack>
 				<Box sx={{ flexGrow: 1 }}>
@@ -247,7 +252,7 @@ const Farm = () => {
 					}
 				</Box>
 			</Stack>
-		</Container>
+		</Container >
 	);
 };
 
@@ -262,7 +267,7 @@ function Row({ pool, index }: RowProps) {
 	const [openStakeDlg, setOpenStakeDlg] = useState(false)
 	const [openUnStakeDlg, setOpenUnStakeDlg] = useState(false)
 	const [rewardsMilky, setRewardsMilky] = useState(0.0)
-	const [totalRewards, setTotalRewards] = useState(0.0)
+	const [totalRewards, setTotalRewards] = useState({ instant: 0.0, locked: 0.0, unlocked: 0.0, total: 0.0 })
 	const [tvl, setTVL] = useState(0.0)
 	const [apr, setAPR] = useState(0.0)
 	const [rewards, setRewards] = useState(0.0)
@@ -284,7 +289,9 @@ function Row({ pool, index }: RowProps) {
 		const address = await signer.getAddress()
 		const network = await web3Provider.getNetwork()
 
-		setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+		if (network.chainId === NetworkId.BscTestnet) {
+			setAppState({ ...appState, provider: provider, web3Provider: web3Provider, address: address, chainId: network.chainId })
+		}
 	}, [])
 
 	useEffect(() => {
@@ -316,15 +323,21 @@ function Row({ pool, index }: RowProps) {
 
 	async function handleStakedBalance() {
 		const lpBalance = await getStakedBalance(pool.pid)
-		const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, pool.address)
-		setStakedUSD(usd)
 		setStakedAmount(lpBalance.balance)
+
+		if (pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address) {
+			const usd = await getCurrentPoolTVL(pool.pid)
+			setStakedUSD(usd)
+		} else {
+			const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, pool.address)
+			setStakedUSD(usd)
+		}
 	}
 
 	async function handlePendingMilky(pid: number, lpAddr: string) {
 		const pendingMilky = await getPendingMilky(pid, lpAddr)
 		setRewardsMilky(pendingMilky.rewards)
-		setTotalRewards(pendingMilky.instant + pendingMilky.locked * 3 / 4)
+		setTotalRewards({ instant: pendingMilky.instant, locked: pendingMilky.locked, unlocked: pendingMilky.unlocked, total: pendingMilky.rewards })
 	}
 
 	async function handleHarvest() {
@@ -380,7 +393,7 @@ function Row({ pool, index }: RowProps) {
 				handleStakedBalance()
 			}
 		}
-	}, 60000);
+	}, 5000);
 
 	const handleStakeOpen = (state: boolean): void => {
 		setOpenStakeDlg(state)
@@ -405,7 +418,7 @@ function Row({ pool, index }: RowProps) {
 			>
 				<TableCell component="th" scope="row" sx={{ borderTopLeftRadius: '14px', borderBottomLeftRadius: '14px' }}>
 					<Stack direction="row" alignItems='center' spacing={3}>
-						<Box>
+						<Box width="60px">
 							{
 								pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
 									<img
@@ -438,21 +451,37 @@ function Row({ pool, index }: RowProps) {
 						<Stack>
 							{
 								pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
-									<CustomTypography fontSize={16} fontWeight="700">{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
+									<span style={{ display: ' flex', fontWeight: "700" }}>
+										{TOKEN_DATA[TOKEN_TYPE.MILKY].label}
+										<Link style={{ textDecoration: 'none', color: 'white', cursor: 'pointer' }} onClick={(e) => {e.stopPropagation()}} target="_blank" href={`/swap?tab=swap&pair2=${TOKEN_DATA[TOKEN_TYPE.MILKY].label.toLowerCase()}`}>
+											<CustomTypography fontSize={16} fontWeight="700">
+												<svg style={{ fill: "white", marginLeft: '6px', position: 'relative' }} viewBox="0 0 24 24" color="primary" width="20px" xmlns="http://www.w3.org/2000/svg">
+													<path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z">
+													</path>
+												</svg>
+											</CustomTypography>
+										</Link>
+									</span>
 								) : pool.tokenA && pool.tokenB && (
-									<Link href={`/swap?tab=liquidity&pair1=${pool.tokenA}&pair2=${pool.tokenB}`}>
-										<CustomTypography fontSize={16} fontWeight="700">
-											{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}
-										</CustomTypography>
-									</Link>
+									<span style={{ display: ' flex', fontWeight: "700" }}>
+										{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}
+										<Link style={{ textDecoration: 'none', color: 'white', cursor: 'pointer' }} onClick={(e) => {e.stopPropagation()}} target="_blank" href={`/swap?tab=liquidity&pair1=${pool.tokenA}&pair2=${pool.tokenB}`}>
+											<CustomTypography fontSize={16} fontWeight="700">
+												<svg style={{ fill: "white", marginLeft: '6px', position: 'relative' }} viewBox="0 0 24 24" color="primary" width="20px" xmlns="http://www.w3.org/2000/svg">
+													<path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z">
+													</path>
+												</svg>
+											</CustomTypography>
+										</Link>
+									</span>
 								)
 							}
-							<CustomTypography variant="body2" color="secondary" fontSize={12}>MilkySwap</CustomTypography>
+							<CustomTypography variant="body2" color="secondary" fontSize={12}>MILKYSWAP</CustomTypography>
 							<CustomTypography variant="body2" color="secondary" fontSize={12}>Farm</CustomTypography>
 						</Stack>
 					</Stack>
 				</TableCell>
-				<TableCell>{fCurrency(tvl)}</TableCell>
+				<TableCell>${tvl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
 				<TableCell>
 					<Stack direction="row" alignItems="center" spacing={2}>
 						<Box>
@@ -465,14 +494,14 @@ function Row({ pool, index }: RowProps) {
 							/>
 						</Box>
 						<CustomTypography fontSize={12}>
-							{rewards.toFixed(1)} TOKEN / DAY
+							{rewards.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MILKY / DAY
 						</CustomTypography>
 					</Stack>
 				</TableCell>
 				<TableCell align="right" sx={{ borderTopRightRadius: '14px', borderBottomRightRadius: '14px' }}>
 					<Stack direction="row" spacing={1} justifyContent="flex-end">
 						<CustomTypography fontSize={14}>
-							{fPercent(apr)}
+							{apr.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
 						</CustomTypography>
 						<Help />
 					</Stack>
@@ -496,9 +525,14 @@ function Row({ pool, index }: RowProps) {
 								<Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 									<Stack flexDirection='column' width='100%'>
 										<Grid container padding={1}>
-											<Grid item xs={6}>
+											<Grid item xs={12}>
 												<CustomTypography sx={{ color: '#fff' }}>
-													Rewards: {totalRewards}
+													<b>Available:</b> {(totalRewards.instant + totalRewards.unlocked).toFixed(5)}
+												</CustomTypography>
+											</Grid>
+											<Grid item xs={12}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													<b>Locked:</b> {totalRewards.locked.toFixed(5)}
 												</CustomTypography>
 											</Grid>
 										</Grid>
@@ -509,15 +543,20 @@ function Row({ pool, index }: RowProps) {
 							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>
 								<Stack direction="row" alignItems="center">
 									<CustomTypography sx={{ color: '#fff' }}>
-										Staked {stakedAmount} (${stakedUSD.toFixed(2)})
+										Staked: {stakedAmount.toFixed(2)} 
 									</CustomTypography>
 									{
 										pool.address === TOKEN_DATA[TOKEN_TYPE.MILKY].address ? (
-											<CustomTypography paddingLeft={3}>{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
+											<CustomTypography paddingLeft={1}>{TOKEN_DATA[TOKEN_TYPE.MILKY].label}</CustomTypography>
 										) : pool.tokenA && pool.tokenB && (
-											<CustomTypography paddingLeft={3}>{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
+											<CustomTypography paddingLeft={1}>{TOKEN_DATA[pool.tokenA as TOKEN_TYPE].label}/{TOKEN_DATA[pool.tokenB as TOKEN_TYPE].label}</CustomTypography>
 										)
 									}
+								</Stack>
+								<Stack direction="row" alignItems="center">
+									<CustomTypography sx={{ color: '#fff' }}>
+										USD Value: (${stakedUSD.toFixed(2)})
+									</CustomTypography>
 								</Stack>
 								<Stack direction="row" alignItems="center">
 									{
@@ -525,8 +564,8 @@ function Row({ pool, index }: RowProps) {
 											<Button fullWidth variant="contained" onClick={connect}>CONNECT WALLET</Button>
 										) : (
 											<>
-												<Button fullWidth variant="contained" onClick={handleClickStake}>Stake</Button>
-												<Button fullWidth variant="contained" onClick={handleClickUnstake} sx={{ marginLeft: '8px' }}>Unstake</Button>
+												<FarmButtonStyle fullWidth variant="contained" onClick={handleClickStake}>Stake</FarmButtonStyle>
+												<FarmButtonStyle fullWidth variant="contained" onClick={handleClickUnstake} sx={{ marginLeft: '8px' }}>Unstake</FarmButtonStyle>
 											</>
 										)
 									}

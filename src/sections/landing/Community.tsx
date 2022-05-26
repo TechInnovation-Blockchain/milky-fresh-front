@@ -13,7 +13,7 @@ const Community = () => {
         <Item3 icon={"icon1"} value="20+" desc="Wallets Supported" />
         <Item3 icon={"icon2"} value="14" desc="Chains Supported" />
         <Item3 icon={"icon3"} value="25k+" desc="Discord Members" />
-        <Item3 icon={"icon4"} value="150k+" desc="Milky Holders" />
+        <Item3 icon={"icon4"} value="150k+" desc="MILKY Holders" />
       </div>
     </section>
   );
