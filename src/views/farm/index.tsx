@@ -393,7 +393,7 @@ function Row({ pool, index }: RowProps) {
 				handleStakedBalance()
 			}
 		}
-	}, 60000);
+	}, 5000);
 
 	const handleStakeOpen = (state: boolean): void => {
 		setOpenStakeDlg(state)
@@ -481,7 +481,7 @@ function Row({ pool, index }: RowProps) {
 						</Stack>
 					</Stack>
 				</TableCell>
-				<TableCell>{fCurrency(tvl)}</TableCell>
+				<TableCell>${tvl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
 				<TableCell>
 					<Stack direction="row" alignItems="center" spacing={2}>
 						<Box>
@@ -494,14 +494,14 @@ function Row({ pool, index }: RowProps) {
 							/>
 						</Box>
 						<CustomTypography fontSize={12}>
-							{rewards.toFixed(0)} MILKY / DAY
+							{rewards.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} MILKY / DAY
 						</CustomTypography>
 					</Stack>
 				</TableCell>
 				<TableCell align="right" sx={{ borderTopRightRadius: '14px', borderBottomRightRadius: '14px' }}>
 					<Stack direction="row" spacing={1} justifyContent="flex-end">
 						<CustomTypography fontSize={14}>
-							{fPercent(apr)}
+							{apr.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
 						</CustomTypography>
 						<Help />
 					</Stack>

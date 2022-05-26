@@ -344,11 +344,15 @@ export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): P
     const address0 = CONTRACT_TABLE[tokenA].address[getNetworkId()]
     const address1 = CONTRACT_TABLE[tokenB].address[getNetworkId()]
 
+    const decimals0 = await getDecimalToken(address0);
+    const decimals1 = await getDecimalToken(address1);
+
     const pairAddress = await getPairAddress(tokenA, tokenB) as string
 
     if (pairAddress === ZERO_ADDRESS) {
         return 0
     }
+
     const pairContract = new ethers.Contract(
         pairAddress,
         MilkyPair.abi,
@@ -371,9 +375,9 @@ export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): P
     } else {
         let result = 0
         if (address0 === token0) {
-            result = formatDecimals(_reserve0, await getDecimalToken(address0)) / formatDecimals(_reserve1, await getDecimalToken(address1))
+            result = formatDecimals(_reserve0, decimals0) / formatDecimals(_reserve1, decimals1)
         } else {
-            result = formatDecimals(_reserve1, await getDecimalToken(address1)) / formatDecimals(_reserve0, await getDecimalToken(address0))
+            result = formatDecimals(_reserve1, decimals1) / formatDecimals(_reserve0, decimals0)
         }
         return result
     }
@@ -401,10 +405,10 @@ export async function approve(address: string, to: string, amount: string | BigN
             case 4001:
                 break
             case "INSUFFICIENT_FUNDS":
-                toast.error("Insufficient fund in your wallet.")
+                toast.error("Insufficient funds in your wallet.")
                 break
             default:
-                toast.error("Token approved failed.")
+                toast.error("Token approve failed.")
                 break
         }
     }
@@ -1098,7 +1102,7 @@ export async function unstakeTokensFromPool(pid: number, address: string, amount
         const events = receipt.events
         if (events && events.length > 0) {
             if (amountBigNumber.isZero()) {
-                toast.success(" Successfully harvested rewards!")
+                toast.success("Successfully harvested rewards!")
             } else {
                 toast.success("Successfully unstake LP tokens!")
             }
