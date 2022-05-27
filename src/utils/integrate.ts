@@ -616,7 +616,7 @@ export async function getCurrentBalanceToUSD(amount: number, lpAddr: string) {
         JsonProvider
     )
 
-    if (Milky.address[getNetworkId()] === lpAddr) return 0.0
+    if (Milky.address[getNetworkId()] === lpAddr) return amount * await getCurrentMilkyPrice();
 
     const { _reserve0, _reserve1 } = await lpContract.getReserves()
 
@@ -978,17 +978,17 @@ export async function addLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amoun
 
         const events = receipt.events
         if (events && events.length > 0) {
-            toast.success("Add Liquidity successfully.")
+            toast.success("Liquidity added successfully.")
         }
     } catch (error: any) {
         switch (error.code) {
             case 4001:
                 break
             case "INSUFFICIENT_FUNDS":
-                toast.error("Insufficient fund in your wallet.")
+                toast.error("Insufficient funds in your wallet.")
                 break
             default:
-                toast.error("Add Liquidity failed.")
+                toast.error("Adding liquidity failed.")
                 break
         }
     }
@@ -1067,7 +1067,7 @@ export async function getRewardMilkyTokens(pid: number, address: string, amount:
 
         const events = receipt.events
         if (events && events.length > 0) {
-            toast.success("Successfully withdraw Milky tokens")
+            toast.success("Rewards successfully claimed.")
 
         }
     } catch (error: any) {
@@ -1075,10 +1075,10 @@ export async function getRewardMilkyTokens(pid: number, address: string, amount:
             case 4001:
                 break
             case "INSUFFICIENT_FUNDS":
-                toast.error("Insufficient fund in your wallet.")
+                toast.error("Insufficient funds in your wallet.")
                 break
             default:
-                toast.error("Failed Withdraw Milky tokens.")
+                toast.error("Claiming rewards failed.")
                 break
         }
     }
@@ -1145,17 +1145,17 @@ export async function stakeTokensToPool(pid: number, amount: string, lpAddress: 
 
         const events = receipt.events
         if (events && events.length > 0) {
-            toast.success("Staking success.")
+            toast.success("Tokens successfully staked.")
         }
     } catch (error: any) {
         switch (error.code) {
             case 4001:
                 break
             case "INSUFFICIENT_FUNDS":
-                toast.error("Insufficient balance.")
+                toast.error("Insufficient funds in your wallet.")
                 break
             default:
-                toast.error("Staking failed.")
+                toast.error("Staking tokens failed.")
                 break
         }
     }

@@ -150,10 +150,10 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
         setAmount('0.0')
         if (type === TypeDialog.STAKE) {
             handleLpBalance(lpAddr)
-        } 
-        // else if (type === TypeDialog.UNSTAKE) {
-        //     handlePoolBalance(lpAddr)
-        // }
+        } else if (type === TypeDialog.UNSTAKE) {
+            handleStakedBalance()
+            // handlePoolBalance(lpAddr)
+        }
     }, [loading])
 
     return (

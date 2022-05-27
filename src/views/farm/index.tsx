@@ -198,7 +198,7 @@ const Farm = () => {
 						width: isDesktop ? '300px' : '100%',
 					}}
 				>
-					<FarmBox text="Your Farm" type={false} point={-1} farmClicked={farmClicked} />
+					<FarmBox text="Your Farms" type={false} point={-1} farmClicked={farmClicked} />
 					<Divider sx={{ my: 1, bgcolor: "#dd38f2 !important" }} />
 					<Stack spacing={1.5}>
 						<FarmBox key={1} text={`General`} type={true} point={0} farmClicked={farmClicked} />
@@ -411,7 +411,8 @@ function Row({ pool, index }: RowProps) {
 				sx={{
 					backgroundColor: '#2b0e79',
 					'&:hover': {
-						backgroundColor: '#1f0f4a'
+						backgroundColor: '#1f0f4a',
+						cursor: 'pointer'
 					},
 					height: '100px'
 				}}
@@ -527,17 +528,22 @@ function Row({ pool, index }: RowProps) {
 										<Grid container padding={1}>
 											<Grid item xs={12}>
 												<CustomTypography sx={{ color: '#fff' }}>
-													<b>Available:</b> {(totalRewards.instant + totalRewards.unlocked).toFixed(5)}
+													<b>Available:</b> {(totalRewards.instant + totalRewards.unlocked).toFixed(2)} MILKY
 												</CustomTypography>
 											</Grid>
 											<Grid item xs={12}>
 												<CustomTypography sx={{ color: '#fff' }}>
-													<b>Locked:</b> {totalRewards.locked.toFixed(5)}
+													<b>Locked:</b> {totalRewards.locked.toFixed(2)} MILKY
+												</CustomTypography>
+											</Grid>
+											<Grid item xs={12}>
+												<CustomTypography sx={{ color: '#fff' }}>
+													<b>Total:</b> {totalRewards.total.toFixed(2)} MILKY
 												</CustomTypography>
 											</Grid>
 										</Grid>
 									</Stack>
-									<Button disabled={(rewardsMilky > 0 && !loading) ? false : true} variant="contained" onClick={handleHarvest}>Harvest</Button>
+									<Button disabled={((totalRewards.instant > 0 || totalRewards.unlocked > 0) && !loading) ? false : true} variant="contained" onClick={handleHarvest}>Harvest</Button>
 								</Box>
 							</Grid>
 							<Grid item borderRadius={3} padding={2} border={2} borderColor={'#fff'} xs={5}>

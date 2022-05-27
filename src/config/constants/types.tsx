@@ -23,5 +23,5 @@ export enum FarmType {
 
 export const enum TypeDialog {
   STAKE='Stake',
-  UNSTAKE='UnStake'
+  UNSTAKE='Unstake'
 }
