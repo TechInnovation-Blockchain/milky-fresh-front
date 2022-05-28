@@ -33,8 +33,8 @@ const Footer = () => {
 			mx: 3,
 			borderTop: '1px solid #FFFFFF',
 		}}>
-			<LinkStyle>Home</LinkStyle>
-			<LinkStyle>Trade</LinkStyle>
+			<LinkStyle href="/">Home</LinkStyle>
+			<LinkStyle href="/swap">Trade</LinkStyle>
 			<Stack direction="row" spacing={2.5} mx={5}>
 				<IconButtonStyle>
 					<img src={twitter} alt="Twitter" />
@@ -47,7 +47,7 @@ const Footer = () => {
 				</IconButtonStyle>
 				{/* <Iconify icon={'eva:copy-fill'} sx={{width: 24, height:24}} /> */}
 			</Stack>
-			<LinkStyle>WSG</LinkStyle>
+			<LinkStyle href="https://wsg.gg">WSG</LinkStyle>
 			<Typography variant="body2" color="white" fontSize={11}>Build: 0.1</Typography>
 		</Box>
 	)
