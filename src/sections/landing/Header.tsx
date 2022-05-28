@@ -13,10 +13,7 @@ const Header = () => {
 
       <div className={style.article}>
         <p className={style.paragraph}>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium
-          cupiditate assumenda explicabo cum, ea provident porro eum delectus
-          temporibus natus necessitatibus error soluta hic culpa nihil ullam.
-          Facere, perspiciatis tempora.
+        MilkyWay Exchange is a new one of a kind decentralised trading platform offering a unique vested farming reward system that allows a high APR on staking and ensures the sustainability of the economy. The platform is focused on bringing real value to the community and turning into a true DAO.
         </p>
         <div className={style.btn__groups}>
           <a href="/swap"><button className={style.btn}>Enter App</button></a>
