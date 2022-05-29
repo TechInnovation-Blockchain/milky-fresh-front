@@ -336,8 +336,10 @@ function Row({ pool, index }: RowProps) {
 
 	async function handlePendingMilky(pid: number, lpAddr: string) {
 		const pendingMilky = await getPendingMilky(pid, lpAddr)
-		setRewardsMilky(pendingMilky.rewards)
-		setTotalRewards({ instant: pendingMilky.instant, locked: pendingMilky.locked, unlocked: pendingMilky.unlocked, total: pendingMilky.rewards })
+		if (pendingMilky !== undefined) {
+			setRewardsMilky(pendingMilky.rewards)
+			setTotalRewards({ instant: pendingMilky.instant, locked: pendingMilky.locked, unlocked: pendingMilky.unlocked, total: pendingMilky.rewards })
+		}
 	}
 
 	async function handleHarvest() {

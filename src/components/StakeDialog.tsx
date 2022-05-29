@@ -88,10 +88,12 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
 
     async function handleLpBalance(lpAddr: string) {
         const lpBalance = await getLPBalance(lpAddr)
-        const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, lpAddr)
-        setBalanceUSD(usd)
-        setRealBalance(lpBalance.realBalance)
-        setBalance(lpBalance.balance)
+        if (lpBalance !== undefined) {
+            const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, lpAddr)
+            setBalanceUSD(usd)
+            setRealBalance(lpBalance.realBalance)
+            setBalance(lpBalance.balance)
+        }
     }
 
     async function handlePoolBalance(lpAddr: string) {
@@ -104,10 +106,12 @@ export default function CustomizedDialogs({ open, lpAddr, pid, type, pairType, h
 
     async function handleStakedBalance() {
         const lpBalance = await getStakedBalance(pid)
-        const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, lpAddr)
-        setBalanceUSD(usd)
-        setRealBalance(lpBalance.realBalance)
-        setBalance(lpBalance.balance)
+        if (lpBalance !== undefined) {
+            const usd = await getCurrentBalanceToUSD(lpBalance.balance as number, lpAddr)
+            setBalanceUSD(usd)
+            setRealBalance(lpBalance.realBalance)
+            setBalance(lpBalance.balance)
+        }
     }
 
     useEffect(() => {
