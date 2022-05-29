@@ -69,6 +69,7 @@ const Header = () => {
 
 	const disconnect = useCallback(
 		async function () {
+			console.log("sdfdsf");
 			await web3Modal.clearCachedProvider()
 			if (provider?.disconnect && typeof provider.disconnect === 'function') {
 				await provider.disconnect()
@@ -142,7 +143,7 @@ const Header = () => {
 	) => {
 		setSelectedIndex(index);
 		if (index === 2) {
-			connect();
+			appState.web3Provider ? disconnect() : connect();
 		}
 		setOpen(false);
 	};
