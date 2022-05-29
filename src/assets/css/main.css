@@ -18,7 +18,7 @@ blockquote,
 dl,
 dd {
   margin: 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 /* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
@@ -37,7 +37,7 @@ body {
   min-height: 100vh;
   text-rendering: optimizeSpeed;
   line-height: 1.5;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 /* A elements that don't have a class get default styles */
@@ -85,13 +85,13 @@ html {
   -o-background-size: cover;
   background-size: cover;
   background-position: center;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 /* over custom css for body */
 
 .main-layout {
-  background: url('../images/img3.jpeg') no-repeat;
+  background: url("../images/img3.jpeg") no-repeat;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -100,4 +100,17 @@ html {
 
 aside.svelte-rntogh {
   z-index: 2 !important;
+}
+
+.smallMenu {
+  background-color: var(--btnPurple) !important;
+}
+
+.smallMenuChild {
+  color: white;
+  border-radius: 10px;
+}
+
+.smallMenuParent {
+  margin-left: -5px !important;
 }

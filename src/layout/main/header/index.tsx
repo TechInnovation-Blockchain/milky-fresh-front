@@ -33,7 +33,7 @@ const languages = [
 	{ label: 'English', value: 'en' },
 ];
 const options = [
-	'SWAP', 'FARM', 'CONNECT WALLET',
+	'Swap', 'Farm', 'Connect Wallet',
 ];
 
 const Header = () => {
@@ -210,6 +210,7 @@ const Header = () => {
 				transition
 				disablePortal
 				style={{ zIndex: 2 }}
+				className="smallMenuParent"
 			>
 				{({ TransitionProps, placement }) => (
 					<Grow
@@ -219,9 +220,9 @@ const Header = () => {
 								placement === 'bottom' ? 'center top' : 'center bottom',
 						}}
 					>
-						<Paper>
+						<Paper className="smallMenu">
 							<ClickAwayListener onClickAway={handleClose}>
-								<MenuList id="split-button-menu">
+								<MenuList className="smallMenuChild" id="split-button-menu">
 									{options.map((option, index) => (
 										<MenuItem
 											key={option}
