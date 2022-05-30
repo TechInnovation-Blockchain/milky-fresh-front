@@ -47,7 +47,7 @@ const Footer = () => {
 				</IconButtonStyle>
 				{/* <Iconify icon={'eva:copy-fill'} sx={{width: 24, height:24}} /> */}
 			</Stack>
-			<LinkStyle href="https://wsg.gg">WSG</LinkStyle>
+			<LinkStyle href="https://wsg.gg">Wall Street Games</LinkStyle>
 			<Typography variant="body2" color="white" fontSize={11}>Build: 0.1</Typography>
 		</Box>
 	)
