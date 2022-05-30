@@ -168,7 +168,11 @@ export async function getBalance() {
 }
 
 export function getSigner() {
-    return walletProvider.getSigner()
+    try {
+        return walletProvider ? walletProvider.getSigner() : undefined
+    } catch (e) {
+        return undefined
+    }
 }
 
 export async function getDecimalFunc(token: TOKEN_TYPE): Promise<number> {
@@ -384,6 +388,8 @@ export async function getRateFromPair(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE): P
 }
 
 export async function approve(address: string, to: string, amount: string | BigNumber, decimal: number) {
+    if (getSigner() === undefined) return;
+
     const contract = new ethers.Contract(
         address,
         IERC20.abi,
@@ -822,6 +828,7 @@ export async function getPoolDataFromPoint(point: number): Promise<any> {
 
 export async function removeLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, liquidity: BigNumber, address: string, deadline: number) {
     if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB]) return
+    if (getSigner() === undefined) return;
 
     const contract = new ethers.Contract(
         MilkyRouter.address[getNetworkId()],
@@ -892,6 +899,7 @@ export async function removeLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, li
 
 export async function addLiquidity(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amountA: string, amountB: string, address: string, deadline: number) {
     if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB]) return
+    if (getSigner() === undefined) return;
 
     const contractRouter = new ethers.Contract(
         MilkyRouter.address[getNetworkId()],
@@ -1017,6 +1025,8 @@ export async function getTokenBalance(value: TOKEN_TYPE, address: string): Promi
 }
 
 export async function getStakedBalance(pid: number): Promise<any> {
+    if (getSigner() === undefined) return;
+
     const contract = new ethers.Contract(
         MasterChef.address[getNetworkId()],
         MasterChef.abi,
@@ -1032,6 +1042,8 @@ export async function getStakedBalance(pid: number): Promise<any> {
 }
 
 export async function getPendingMilky(pid: number, lpAddr: string) {
+    if (getSigner() === undefined) return;
+
     const contract = new ethers.Contract(
         MasterChef.address[getNetworkId()],
         MasterChef.abi,
@@ -1049,6 +1061,7 @@ export async function getPendingMilky(pid: number, lpAddr: string) {
 }
 
 export async function getRewardMilkyTokens(pid: number, address: string, amount: string | BigNumber) {
+    if (getSigner() === undefined) return;
 
     await approve(address, MasterChef.address[getNetworkId()], amount, await getDecimalToken(address))
 
@@ -1085,6 +1098,7 @@ export async function getRewardMilkyTokens(pid: number, address: string, amount:
 }
 
 export async function unstakeTokensFromPool(pid: number, address: string, amount: string | BigNumber) {
+    if (getSigner() === undefined) return;
 
     const contract = new ethers.Contract(
         MasterChef.address[getNetworkId()],
@@ -1119,6 +1133,8 @@ export async function unstakeTokensFromPool(pid: number, address: string, amount
 }
 
 export async function stakeTokensToPool(pid: number, amount: string, lpAddress: string, balance: number) {
+    if (getSigner() === undefined) return;
+
     const lpContract = new ethers.Contract(
         lpAddress,
         IERC20.abi,
@@ -1198,6 +1214,7 @@ export async function getPoolBalance(token: string): Promise<any> {
 
 export async function swapTokensToEth(tokenA: TOKEN_TYPE, tokenB: TOKEN_TYPE, amountIn: string, amountOutMin: string, address: string, slippage: number, deadline: number, commonPattern: TOKEN_TYPE | string) {
     if (!CONTRACT_TABLE[tokenA] || !CONTRACT_TABLE[tokenB]) return 0
+    if (getSigner() === undefined) return;
 
     const contractRouter = new ethers.Contract(
         MilkyRouter.address[getNetworkId()],
