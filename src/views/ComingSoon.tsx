@@ -6,7 +6,7 @@ import style from "../views/coming_soon.module.css";
 
 const ComingSoon = () => {
   useEffect(() => {
-    document.querySelector('html') ? document.querySelector('html')!.style.backgroundPositionY = '5%' : null;
+    document.querySelector('html')!.style.backgroundPositionY = '5%';
   }, []);
 
 
